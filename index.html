@@ -63,6 +63,15 @@
   <button onclick="show('journal-history')">Journal History</button>
 </header>
 
+  <!-- COA OPTIONS BAR (only shows on Chart of Accounts tab) -->
+<div id="coa-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
+  <b>Chart of Accounts Options:</b>
+  <button onclick="focusAddAccount()">+ Add Account</button>
+  <button onclick="editSelectedCOA()">Edit Selected</button>
+  <button onclick="deleteSelectedCOA()">Delete Selected</button>
+  <span id="coa-selected-label" style="margin-left:10px; color:#555;"></span>
+</div>
+  
 <div style="margin:10px 0;">
   Year:
   <select id="filter-year" onchange="applyDateFilter()"></select>
@@ -83,15 +92,6 @@
     <option value="11">Nov</option>
     <option value="12">Dec</option>
   </select>
-</div>
-
-  <!-- COA OPTIONS BAR (only shows on Chart of Accounts tab) -->
-<div id="coa-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
-  <b>Chart of Accounts Options:</b>
-  <button onclick="focusAddAccount()">+ Add Account</button>
-  <button onclick="editSelectedCOA()">Edit Selected</button>
-  <button onclick="deleteSelectedCOA()">Delete Selected</button>
-  <span id="coa-selected-label" style="margin-left:10px; color:#555;"></span>
 </div>
 
 <!-- ========================= COA ========================= -->
