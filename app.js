@@ -477,6 +477,10 @@ window.show = function (view) {
   if (view === "ledger") renderLedger();
   if (view === "trial") renderTrialBalance();  
   if (view === "journal-history") renderHistory();
+  
+  // Show toolbar only on COA tab
+const tb = $("coa-toolbar");
+if (tb) tb.style.display = (view === "coa") ? "block" : "none";
 };
 
 // ==============================
@@ -1221,6 +1225,30 @@ function esc(s) {
     markRequired(el, !val);
   });
 });
+
+let selectedCOAId = "";
+
+window.selectCOA = function (id) {
+  selectedCOAId = id || "";
+  const label = $("coa-selected-label");
+  const acct = COA.find(a => a.id === selectedCOAId);
+  if (label) label.textContent = acct ? `Selected: ${acct.code} - ${acct.name}` : "";
+};
+
+window.focusAddAccount = function () {
+  show("coa");
+  $("coa-code")?.focus();
+};
+
+window.editSelectedCOA = function () {
+  if (!selectedCOAId) return alert("Select an account first.");
+  startEditCOAName(selectedCOAId); // your existing inline edit
+};
+
+window.deleteSelectedCOA = function () {
+  if (!selectedCOAId) return alert("Select an account first.");
+  deleteCOAAccount(selectedCOAId); // your existing delete function
+};
 
 // ==============================
 // INLINE EDIT COA NAME (no prompt)
