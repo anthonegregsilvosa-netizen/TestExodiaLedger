@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini QuickBooks</title>
+  <link rel="stylesheet" href="./styles.css" />
+
+  <style>
+    /* Filters */
+    #filters select {
+      width: auto;
+      padding: 4px 6px;
+      font-size: 14px;
+    }
+
+    /* Journal Inputs */
+    #journal input[type="text"],
+    #journal input[type="number"],
+    #journal input[type="date"],
+    #journal input[type="password"],
+    #journal select,
+    #journal textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    #journal {
+      max-width: 1000px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ========================= AUTH ========================= -->
+<div id="auth-box" style="border:1px solid #ccc; padding:10px; margin:10px;">
+  <div id="auth-logged-out">
+    <input id="auth-email" type="email" placeholder="Email" style="width:220px;">
+    <input id="auth-pass" type="password" placeholder="Password" style="width:220px;">
+    <button id="auth-toggle-pass" type="button">👁</button>
+    <button id="auth-login-btn" onclick="signIn()" disabled>Login</button>
+    <span id="auth-msg" style="margin-left:10px;"></span>
+  </div>
+
+  <div id="auth-logged-in" style="display:none;">
+    Logged in as: <b id="auth-user"></b>
+    <button onclick="signOut()" style="margin-left:10px;">Logout</button>
+    <span id="auth-msg-in" style="margin-left:10px;"></span>
+  </div>
+</div>
+
+<!-- ========================= APP ========================= -->
+<div id="app" style="display:none;">
+
+<header style="padding:12px; border-bottom:1px solid #ccc;">
+  <button onclick="show('coa')">Chart of Accounts</button>
+  <button onclick="show('journal')">Journal Entry</button>
+  <button onclick="show('ledger')">General Ledger</button>
+  <button onclick="show('trial')">Trial Balance</button>
+</header>
+
+<div style="margin:10px 0;">
+  Year:
+  <select id="filter-year" onchange="applyDateFilter()"></select>
+
+  Month:
+  <select id="filter-month" onchange="applyDateFilter()">
+    <option value="">All</option>
+    <option value="1">Jan</option>
+    <option value="2">Feb</option>
+    <option value="3">Mar</option>
+    <option value="4">Apr</option>
+    <option value="5">May</option>
+    <option value="6">Jun</option>
+    <option value="7">Jul</option>
+    <option value="8">Aug</option>
+    <option value="9">Sep</option>
+    <option value="10">Oct</option>
+    <option value="11">Nov</option>
+    <option value="12">Dec</option>
+  </select>
+</div>
+
+<!-- ========================= COA ========================= -->
+<section id="coa">
+  <h2>Chart of Accounts</h2>
+
+  <div id="filters" style="margin:10px 0;">
+    <button onclick="filterCOA('All')">All</button>
+    <button onclick="filterCOA('Asset')">Assets</button>
+    <button onclick="filterCOA('Liability')">Liabilities</button>
+    <button onclick="filterCOA('Equity')">Equity</button>
+    <button onclick="filterCOA('Revenue')">Revenue</button>
+    <button onclick="filterCOA('Expense')">Expenses</button>
+  </div>
+
+  <div style="margin:10px 0; display:flex; gap:8px; flex-wrap:wrap; align-items:end;">
+    <label>Code<br><input id="coa-code" type="text" placeholder="1001"></label>
+    <label>Name<br><input id="coa-name" type="text" placeholder="Cash in Bank"></label>
+
+    <label>Type<br>
+      <select id="coa-type">
+        <option>Asset</option>
+        <option>Liability</option>
+        <option>Equity</option>
+        <option>Revenue</option>
+        <option>Expense</option>
+      </select>
+    </label>
+
+    <label>Normal<br>
+      <select id="coa-normal">
+        <option>Debit</option>
+        <option>Credit</option>
+      </select>
+    </label>
+
+    <button onclick="addCOAAccount()">Add Account</button>
+  </div>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Account Name</th>
+        <th>Type</th>
+        <th>Normal</th>
+        <th>Balance</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="coa-body"></tbody>
+  </table>
+</section>
+
+<!-- ========================= JOURNAL ========================= -->
+<section id="journal" style="display:none;">
+  <h2>Journal Entry</h2>
+
+  <div style="display:grid; grid-template-columns: 220px 1fr; gap:8px; max-width:900px;">
+    <label>Date *
+      <input type="date" id="je-date">
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Reference No. *
+      <input type="text" id="je-refno">
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Description *
+      <input type="text" id="je-description">
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Department / Cost Center:
+      <input type="text" id="je-dept">
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Payment Method:
+      <input type="text" id="je-paymethod">
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Client / Vendor:
+      <input type="text" id="je-client">
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Remarks:
+      <input type="text" id="je-remarks">
+    </label>
+  </div>
+
+  <br>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Account</th>
+        <th>Debit</th>
+        <th>Credit</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="je-lines"></tbody>
+  </table>
+
+  <button onclick="addLine()">Add Line</button>
+  <button onclick="saveJournal()">Save Journal Entry</button>
+
+  <p id="je-status"></p>
+</section>
+
+<!-- ========================= LEDGER ========================= -->
+<section id="ledger" style="display:none;">
+  <h2>General Ledger</h2>
+
+  <select id="ledger-account" onchange="renderLedger()"></select>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Ref</th>
+        <th>Debit</th>
+        <th>Credit</th>
+        <th>Running Balance</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="ledger-body"></tbody>
+  </table>
+</section>
+
+<!-- ========================= TRIAL BALANCE ========================= -->
+<section id="trial" style="display:none;">
+  <h2>Trial Balance</h2>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Account Name</th>
+        <th>Type</th>
+        <th style="text-align:right;">Debit</th>
+        <th style="text-align:right;">Credit</th>
+      </tr>
+    </thead>
+    <tbody id="tb-body"></tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3"><b>Total</b></td>
+        <td id="tb-total-debit" style="text-align:right;"><b>0.00</b></td>
+        <td id="tb-total-credit" style="text-align:right;"><b>0.00</b></td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <p id="tb-status"></p>
+</section>
+
+</div>
+
+<!-- ========================= SCRIPTS ========================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./app.js"></script>
+
+</body>
+</html>
