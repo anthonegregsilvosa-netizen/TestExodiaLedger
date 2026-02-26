@@ -60,6 +60,7 @@
   <button onclick="show('journal')">Journal Entry</button>
   <button onclick="show('ledger')">General Ledger</button>
   <button onclick="show('trial')">Trial Balance</button>
+  <button onclick="show('history')">Journal History</button>
 </header>
 
 <div style="margin:10px 0;">
@@ -242,6 +243,31 @@
   </table>
 
   <p id="tb-status"></p>
+</section>
+
+  <!-- =========================
+     HISTORY
+========================= -->
+<section id="journal history" style="display:none;">
+  <h2>Journal Entry History</h2>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Entry Date</th>
+        <th>Saved Time</th>
+        <th>Ref</th>
+        <th>Description</th>
+        <th>Department</th>
+        <th>Payment Method</th>
+        <th>Client/Vendor</th>
+        <th>Remarks</th>
+      </tr>
+    </thead>
+    <tbody id="history-body"></tbody>
+  </table>
+
+  <p id="history-status"></p>
 </section>
 
 </div>
