@@ -467,7 +467,7 @@ window.applyDateFilter = function () {
 window.show = function (view) {
   localStorage.setItem(LAST_VIEW_KEY, view);
 
-  ["coa", "journal", "ledger", "trial", "history"].forEach((v) => {
+  ["coa", "journal", "ledger", "trial", "journal-history"].forEach((v) => {
     const el = $(v);
     if (!el) return;
     el.style.display = v === view ? "block" : "none";
@@ -476,7 +476,7 @@ window.show = function (view) {
   if (view === "coa") renderCOA();
   if (view === "ledger") renderLedger();
   if (view === "trial") renderTrialBalance();  
-  if (view === "history") renderJournalHistory();
+  if (view === "journal-history") renderHistory();
 };
 
 // ==============================
