@@ -813,27 +813,25 @@ function renderCOA() {
     tr.setAttribute("data-coa-row", a.id);
 
     tr.innerHTML = `
-      <td>${esc(a.code)}</td>
-      <td>
-        <span class="coa-name-view">${esc(a.name)}</span>
-        <input class="coa-name-edit" data-coa-edit-name
-          value="${esc(a.name)}"
-          style="display:none; width:95%;" />
-      </td>
-      <td>${esc(a.type)}</td>
-      <td>${esc(a.normal)}</td>
-      <td style="text-align:right;">${money(bal)}</td>
-      <td>
-        <span class="coa-actions-view">
-          <button onclick="startEditCOAName('${a.id}')">Edit Name</button>
-          <button onclick="deleteCOAAccount('${a.id}')">Delete</button>
-        </span>
-        <span class="coa-actions-edit" style="display:none;">
-          <button onclick="saveEditCOAName('${a.id}')">Save</button>
-          <button onclick="cancelEditCOAName()">Cancel</button>
-        </span>
-      </td>
-    `;
+  <td style="text-align:center;">
+    <input type="radio" name="coaPick" onchange="selectCOA('${a.id}')">
+  </td>
+
+  <td>${esc(a.code)}</td>
+
+  <td>${esc(a.name)}</td>
+
+  <td>${esc(a.type)}</td>
+
+  <td>${esc(a.normal)}</td>
+
+  <td style="text-align:right;">${money(bal)}</td>
+
+  <td>
+    <button onclick="editAccountPrompt('${a.id}')">Edit</button>
+    <button onclick="deleteCOAAccount('${a.id}')">Delete</button>
+  </td>
+`;
 
     tbody.appendChild(tr);
   });
@@ -1242,12 +1240,7 @@ window.focusAddAccount = function () {
 
 window.editSelectedCOA = function () {
   if (!selectedCOAId) return alert("Select an account first.");
-  startEditCOAName(selectedCOAId); // your existing inline edit
-};
-
-window.deleteSelectedCOA = function () {
-  if (!selectedCOAId) return alert("Select an account first.");
-  deleteCOAAccount(selectedCOAId); // your existing delete function
+  editAccountPrompt(selectedCOAId); // ✅ popup prompt style
 };
 
 // ==============================
@@ -1324,4 +1317,22 @@ window.deleteCOAAccount = async function (id) {
     console.error(e);
     alert("Failed to delete account. Check RLS policies.");
   }
+};
+
+// ==============================
+// COA TOOLBAR (TOP OPTIONS BAR)
+// ==============================
+window.focusAddAccount = function () {
+  show("coa");
+  $("coa-code")?.focus();
+};
+
+window.editSelectedCOA = function () {
+  if (!selectedCOAId) return alert("Select an account first.");
+  editAccountPrompt(selectedCOAId);
+};
+
+window.deleteSelectedCOA = function () {
+  if (!selectedCOAId) return alert("Select an account first.");
+  deleteCOAAccount(selectedCOAId);
 };
