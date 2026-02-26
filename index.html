@@ -131,17 +131,26 @@
     <button onclick="addCOAAccount()">Add Account</button>
   </div>
 
+  tr.innerHTML = `
+  <td style="text-align:center;">
+    <input type="radio" name="coaPick" onchange="selectCOA('${a.id}')">
+  </td>
+  <td>${esc(a.code)}</td>
+  ...
+`;
+
   <table border="1" cellpadding="6">
     <thead>
-      <tr>
-        <th>Code</th>
-        <th>Account Name</th>
-        <th>Type</th>
-        <th>Normal</th>
-        <th>Balance</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+  <tr>
+    <th>Select</th>
+    <th>Code</th>
+    <th>Account Name</th>
+    <th>Type</th>
+    <th>Normal</th>
+    <th>Balance</th>
+    <th>Actions</th>
+  </tr>
+</thead>
     <tbody id="coa-body"></tbody>
   </table>
 </section>
