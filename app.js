@@ -155,6 +155,38 @@ function normalizeLine(row) {
   };
 }
 
+function normalizeEntry(row) {
+  return {
+    id: row.id,
+    entry_date: row.entry_date,
+    ref: row.ref,
+    description: row.description || "",
+    department: row.department || "",
+    payment_method: row.payment_method || "",
+    client_vendor: row.client_vendor || "",
+    remarks: row.remarks || "",
+    created_at: row.created_at,
+  };
+}
+
+async function sbFetchJournalEntries() {
+  if (!currentUser) return [];
+
+  const { data, error } = await sb
+    .from("journal_entries")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Entries fetch error:", error);
+    return [];
+  }
+
+  return (data || []).map(normalizeEntry);
+}
+
 async function sbFetchJournalLines() {
   if (!currentUser) return [];
   const { data, error } = await sb
@@ -435,7 +467,7 @@ window.applyDateFilter = function () {
 window.show = function (view) {
   localStorage.setItem(LAST_VIEW_KEY, view);
 
-  ["coa", "journal", "ledger", "trial"].forEach((v) => {
+  ["coa", "journal", "ledger", "trial", "history"].forEach((v) => {
     const el = $(v);
     if (!el) return;
     el.style.display = v === view ? "block" : "none";
@@ -443,7 +475,8 @@ window.show = function (view) {
 
   if (view === "coa") renderCOA();
   if (view === "ledger") renderLedger();
-  if (view === "trial") renderTrialBalance();
+  if (view === "trial") renderTrialBalance();  
+  if (view === "history") renderJournalHistory();
 };
 
 // ==============================
@@ -806,6 +839,52 @@ function renderCOA() {
     tr.innerHTML = `<td colspan="6">No accounts found for this filter.</td>`;
     tbody.appendChild(tr);
   }
+}
+
+function formatTime(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+async function renderHistory() {
+  const tbody = $("history-body");
+  const status = $("history-status");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (status) status.textContent = "Loading...";
+
+  const entries = await sbFetchJournalEntries();
+
+  if (entries.length === 0) {
+    if (status) status.textContent = "No journal entries yet.";
+    return;
+  }
+
+  entries.forEach((e) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(e.entry_date)}</td>
+      <td>${esc(formatTime(e.created_at))}</td>
+      <td>${esc(e.ref)}</td>
+      <td>${esc(e.description)}</td>
+      <td>${esc(e.department)}</td>
+      <td>${esc(e.payment_method)}</td>
+      <td>${esc(e.client_vendor)}</td>
+      <td>${esc(e.remarks)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (status) status.textContent = `Showing ${entries.length} entries.`;
 }
 
 // ==============================
