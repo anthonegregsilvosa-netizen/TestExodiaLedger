@@ -1,0 +1,2242 @@
+[
+  {
+    "id": "1001",
+    "code": "1001",
+    "name": "Cash on Hand",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2100",
+    "code": "2100",
+    "name": "Current Liabilities (General)",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "3000",
+    "code": "3000",
+    "name": "Owner\u2019s Equity",
+    "type": "Equity",
+    "normal": "Credit"
+  },
+  {
+    "id": "4000",
+    "code": "4000",
+    "name": "General Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5000",
+    "code": "5000",
+    "name": "Facilities Department Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1002",
+    "code": "1002",
+    "name": "Petty Cash",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2110",
+    "code": "2110",
+    "name": "Accounts Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "3100",
+    "code": "3100",
+    "name": "Retained Earnings",
+    "type": "Equity",
+    "normal": "Credit"
+  },
+  {
+    "id": "4010",
+    "code": "4010",
+    "name": "Interest Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5001",
+    "code": "5001",
+    "name": "FE - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1003",
+    "code": "1003",
+    "name": "Undeposited Funds",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2140",
+    "code": "2140",
+    "name": "Salaries & Wages Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "3200",
+    "code": "3200",
+    "name": "Drawings / Owner\u2019s Draw",
+    "type": "Equity",
+    "normal": "Debit"
+  },
+  {
+    "id": "4020",
+    "code": "4020",
+    "name": "Late Fee Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5002",
+    "code": "5002",
+    "name": "FE - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1004",
+    "code": "1004",
+    "name": "Bank \u2013 Exodia UB (PHP)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2130",
+    "code": "2130",
+    "name": "Employer_Payroll_Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "3300",
+    "code": "3300",
+    "name": "Opening Balance Offset",
+    "type": "Equity",
+    "normal": "Credit"
+  },
+  {
+    "id": "4030",
+    "code": "4030",
+    "name": "Discount (Sales Discount Given)",
+    "type": "Revenue",
+    "normal": "Debit"
+  },
+  {
+    "id": "5003",
+    "code": "5003",
+    "name": "FE - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1005",
+    "code": "1005",
+    "name": "Bank \u2013 Exodia UB (USD)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2150",
+    "code": "2150",
+    "name": "Service Charge Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "3400",
+    "code": "3400",
+    "name": "Income Summary",
+    "type": "Equity",
+    "normal": "Credit"
+  },
+  {
+    "id": "4040",
+    "code": "4040",
+    "name": "Other Charges",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5004",
+    "code": "5004",
+    "name": "FE - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1006",
+    "code": "1006",
+    "name": "Bank \u2013 Exodia SBC (PHP)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2160",
+    "code": "2160",
+    "name": "Agent Commission Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4050",
+    "code": "4050",
+    "name": "Shipping Charge Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5005",
+    "code": "5005",
+    "name": "FE - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1007",
+    "code": "1007",
+    "name": "Bank \u2013 Exodia SBC (USD)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2170",
+    "code": "2170",
+    "name": "Retainer Fees Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4060",
+    "code": "4060",
+    "name": "Sales Discount",
+    "type": "Revenue",
+    "normal": "Debit"
+  },
+  {
+    "id": "5006",
+    "code": "5006",
+    "name": "FE - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1008",
+    "code": "1008",
+    "name": "Bank \u2013 Payoneer",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "4070",
+    "code": "4070",
+    "name": "Sales Returns and Allowances",
+    "type": "Revenue",
+    "normal": "Debit"
+  },
+  {
+    "id": "5007",
+    "code": "5007",
+    "name": "FE - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1009",
+    "code": "1009",
+    "name": "Cash Clearing (Sales to Customer)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2200",
+    "code": "2200",
+    "name": "Tax Payable (General)",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5008",
+    "code": "5008",
+    "name": "FE - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "2201",
+    "code": "2201",
+    "name": "SSS Premium Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4100",
+    "code": "4100",
+    "name": "Game Development Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5009",
+    "code": "5009",
+    "name": "FE - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1101",
+    "code": "1101",
+    "name": "Accounts Receivable \u2013 Trade (General)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2202",
+    "code": "2202",
+    "name": "PhilHealth Premium Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4101",
+    "code": "4101",
+    "name": "Outsourcing Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5010",
+    "code": "5010",
+    "name": "FE - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1102",
+    "code": "1102",
+    "name": "Accounts Receivable \u2013 Non-Trade",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2203",
+    "code": "2203",
+    "name": "Pag-IBIG Premium Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4102",
+    "code": "4102",
+    "name": "Project Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5011",
+    "code": "5011",
+    "name": "FE - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1103",
+    "code": "1103",
+    "name": "Other Receivables",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2204",
+    "code": "2204",
+    "name": "Expanded Withholding Tax (EWT)",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4103",
+    "code": "4103",
+    "name": "Staff Augmentation Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5012",
+    "code": "5012",
+    "name": "FE - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1104",
+    "code": "1104",
+    "name": "Advances to Employees",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2205",
+    "code": "2205",
+    "name": "Withholding Tax on Compensation",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4104",
+    "code": "4104",
+    "name": "Animator Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5013",
+    "code": "5013",
+    "name": "FE - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1105",
+    "code": "1105",
+    "name": "Employee Advance",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2206",
+    "code": "2206",
+    "name": "Final Withholding Tax",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4105",
+    "code": "4105",
+    "name": "Game Artist Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5014",
+    "code": "5014",
+    "name": "FE - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1106",
+    "code": "1106",
+    "name": "Advances to Stockholder",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "4106",
+    "code": "4106",
+    "name": "Project Manager Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5015",
+    "code": "5015",
+    "name": "FE - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1107",
+    "code": "1107",
+    "name": "Advances Tax",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2300",
+    "code": "2300",
+    "name": "Accrued Expenses Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4107",
+    "code": "4107",
+    "name": "Senior Programmer Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5016",
+    "code": "5016",
+    "name": "FE - Office Equipment Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1108",
+    "code": "1108",
+    "name": "TDS Receivable",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2301",
+    "code": "2301",
+    "name": "Unearned Revenue",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "4108",
+    "code": "4108",
+    "name": "Unity Developer Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5017",
+    "code": "5017",
+    "name": "FE - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "4109",
+    "code": "4109",
+    "name": "Quality Assurance Sales Income",
+    "type": "Revenue",
+    "normal": "Credit"
+  },
+  {
+    "id": "5018",
+    "code": "5018",
+    "name": "FE - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1200",
+    "code": "1200",
+    "name": "Prepaid Expenses (General)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2400",
+    "code": "2400",
+    "name": "Loans Payable \u2013 Current Portion",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5019",
+    "code": "5019",
+    "name": "FE - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1201",
+    "code": "1201",
+    "name": "Prepaid Expense - Facilities Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2401",
+    "code": "2401",
+    "name": "Loans Payable \u2013 Non-current",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5020",
+    "code": "5020",
+    "name": "FE - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1202",
+    "code": "1202",
+    "name": "Prepaid Expense - Finance Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2402",
+    "code": "2402",
+    "name": "Advances from Stockholders",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5021",
+    "code": "5021",
+    "name": "FE - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1203",
+    "code": "1203",
+    "name": "Prepaid Expense  - HR Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2403",
+    "code": "2403",
+    "name": "Advances from Others",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5022",
+    "code": "5022",
+    "name": "FE - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1204",
+    "code": "1204",
+    "name": "Prepaid Expense - IT Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2404",
+    "code": "2404",
+    "name": "Building Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5023",
+    "code": "5023",
+    "name": "FE - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1205",
+    "code": "1205",
+    "name": "Prepaid Expense - Marketing Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "2405",
+    "code": "2405",
+    "name": "Transportation Equipment Payable",
+    "type": "Liability",
+    "normal": "Credit"
+  },
+  {
+    "id": "5024",
+    "code": "5024",
+    "name": "FE - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1206",
+    "code": "1206",
+    "name": "Prepaid Expense - Operation Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5025",
+    "code": "5025",
+    "name": "FE - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1207",
+    "code": "1207",
+    "name": "Prepaid Expense - Sales Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5026",
+    "code": "5026",
+    "name": "FE - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1208",
+    "code": "1208",
+    "name": "Prepaid Expense - Office Chiefs",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "1209",
+    "code": "1209",
+    "name": "Prepaid Expense \u2013 Supplies",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5100",
+    "code": "5100",
+    "name": "Finance Department Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1210",
+    "code": "1210",
+    "name": "Prepaid Insurance",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5101",
+    "code": "5101",
+    "name": "Fine - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1211",
+    "code": "1211",
+    "name": "Prepaid Rent",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5102",
+    "code": "5102",
+    "name": "Fine - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1212",
+    "code": "1212",
+    "name": "Prepaid \u2013 Other",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5103",
+    "code": "5103",
+    "name": "Fine - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5104",
+    "code": "5104",
+    "name": "Fine - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1300",
+    "code": "1300",
+    "name": "Inventory Asset",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5105",
+    "code": "5105",
+    "name": "Fine - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5106",
+    "code": "5106",
+    "name": "Fine - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1400",
+    "code": "1400",
+    "name": "Other Current Assets",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5107",
+    "code": "5107",
+    "name": "Fine - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5108",
+    "code": "5108",
+    "name": "Fine - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1500",
+    "code": "1500",
+    "name": "Long-term Receivables",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5109",
+    "code": "5109",
+    "name": "Fine - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1501",
+    "code": "1501",
+    "name": "Security Deposits",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5110",
+    "code": "5110",
+    "name": "Fine - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5111",
+    "code": "5111",
+    "name": "Fine - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1600",
+    "code": "1600",
+    "name": "Property, Plant & Equipment (General)",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5112",
+    "code": "5112",
+    "name": "Fine - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1610",
+    "code": "1610",
+    "name": "Property, Plant & Equipment - Facilities Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5113",
+    "code": "5113",
+    "name": "Fine - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1611",
+    "code": "1611",
+    "name": "Property, Plant & Equipment - Finance Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5114",
+    "code": "5114",
+    "name": "Fine - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1612",
+    "code": "1612",
+    "name": "Property, Plant & Equipment - HR Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5115",
+    "code": "5115",
+    "name": "Fine - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1613",
+    "code": "1613",
+    "name": "Property, Plant & Equipment - IT Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5116",
+    "code": "5116",
+    "name": "Fine - Office Equipment Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1614",
+    "code": "1614",
+    "name": "Property, Plant & Equipment - Marketing Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5117",
+    "code": "5117",
+    "name": "Fine - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1615",
+    "code": "1615",
+    "name": "Property, Plant & Equipment - Operation Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5118",
+    "code": "5118",
+    "name": "Fine - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1616",
+    "code": "1616",
+    "name": "Property, Plant & Equipment - Sales Department",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5119",
+    "code": "5119",
+    "name": "Fine - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1617",
+    "code": "1617",
+    "name": "Property, Plant & Equipment - Office Chiefs",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5120",
+    "code": "5120",
+    "name": "Fine - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1621",
+    "code": "1621",
+    "name": "Office Equipment - Others",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5121",
+    "code": "5121",
+    "name": "Fine - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1622",
+    "code": "1622",
+    "name": "Store Equipment - Others",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5122",
+    "code": "5122",
+    "name": "Fine - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1630",
+    "code": "1630",
+    "name": "Transportation Equipment - Others",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5123",
+    "code": "5123",
+    "name": "Fine - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1640",
+    "code": "1640",
+    "name": "Communication Equipment Others",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5124",
+    "code": "5124",
+    "name": "Fine - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1650",
+    "code": "1650",
+    "name": "Buildings",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5125",
+    "code": "5125",
+    "name": "Fine - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1660",
+    "code": "1660",
+    "name": "Accumulated Depreciation - Store Equipment",
+    "type": "Asset",
+    "normal": "Credit"
+  },
+  {
+    "id": "5126",
+    "code": "5126",
+    "name": "Fine - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1661",
+    "code": "1661",
+    "name": "Accumulated Depreciation - Office Equipment",
+    "type": "Asset",
+    "normal": "Credit"
+  },
+  {
+    "id": "5200",
+    "code": "5200",
+    "name": "Human Resource Department Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1700",
+    "code": "1700",
+    "name": "Intangible Assets \u2013 General",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5201",
+    "code": "5201",
+    "name": "HRE - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1701",
+    "code": "1701",
+    "name": "Software Licenses",
+    "type": "Asset",
+    "normal": "Debit"
+  },
+  {
+    "id": "5202",
+    "code": "5202",
+    "name": "HRE - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "1702",
+    "code": "1702",
+    "name": "Accumulated Amortization",
+    "type": "Asset",
+    "normal": "Credit"
+  },
+  {
+    "id": "5203",
+    "code": "5203",
+    "name": "HRE - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5204",
+    "code": "5204",
+    "name": "HRE - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5205",
+    "code": "5205",
+    "name": "HRE - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5206",
+    "code": "5206",
+    "name": "HRE - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5207",
+    "code": "5207",
+    "name": "HRE - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5208",
+    "code": "5208",
+    "name": "HRE - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5209",
+    "code": "5209",
+    "name": "HRE - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5210",
+    "code": "5210",
+    "name": "HRE - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5211",
+    "code": "5211",
+    "name": "HRE - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5212",
+    "code": "5212",
+    "name": "HRE - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5213",
+    "code": "5213",
+    "name": "HRE - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5214",
+    "code": "5214",
+    "name": "HRE - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5215",
+    "code": "5215",
+    "name": "HRE - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5216",
+    "code": "5216",
+    "name": "HRE - Office Equipment Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5217",
+    "code": "5217",
+    "name": "HRE - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5218",
+    "code": "5218",
+    "name": "HRE - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5219",
+    "code": "5219",
+    "name": "HRE - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5220",
+    "code": "5220",
+    "name": "HRE - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5221",
+    "code": "5221",
+    "name": "HRE - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5222",
+    "code": "5222",
+    "name": "HRE - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5223",
+    "code": "5223",
+    "name": "HRE - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5224",
+    "code": "5224",
+    "name": "HRE - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5225",
+    "code": "5225",
+    "name": "HRE - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5226",
+    "code": "5226",
+    "name": "HRE - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5300",
+    "code": "5300",
+    "name": "Information Technology Department Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5301",
+    "code": "5301",
+    "name": "ITE - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5302",
+    "code": "5302",
+    "name": "ITE - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5303",
+    "code": "5303",
+    "name": "ITE - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5304",
+    "code": "5304",
+    "name": "ITE - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5305",
+    "code": "5305",
+    "name": "ITE - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5306",
+    "code": "5306",
+    "name": "ITE - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5307",
+    "code": "5307",
+    "name": "ITE - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5308",
+    "code": "5308",
+    "name": "ITE - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5309",
+    "code": "5309",
+    "name": "ITE - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5310",
+    "code": "5310",
+    "name": "ITE - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5311",
+    "code": "5311",
+    "name": "ITE - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5312",
+    "code": "5312",
+    "name": "ITE - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5313",
+    "code": "5313",
+    "name": "ITE - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5314",
+    "code": "5314",
+    "name": "ITE - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5315",
+    "code": "5315",
+    "name": "ITE - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5316",
+    "code": "5316",
+    "name": "ITE - Office Equipment Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5317",
+    "code": "5317",
+    "name": "ITE - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5318",
+    "code": "5318",
+    "name": "ITE - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5319",
+    "code": "5319",
+    "name": "ITE - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5320",
+    "code": "5320",
+    "name": "ITE - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5321",
+    "code": "5321",
+    "name": "ITE - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5322",
+    "code": "5322",
+    "name": "ITE - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5323",
+    "code": "5323",
+    "name": "ITE - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5324",
+    "code": "5324",
+    "name": "ITE - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5325",
+    "code": "5325",
+    "name": "ITE - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5326",
+    "code": "5326",
+    "name": "ITE - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5400",
+    "code": "5400",
+    "name": "Marketing Department Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5401",
+    "code": "5401",
+    "name": "ME - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5402",
+    "code": "5402",
+    "name": "ME - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5403",
+    "code": "5403",
+    "name": "ME - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5404",
+    "code": "5404",
+    "name": "ME - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5405",
+    "code": "5405",
+    "name": "ME - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5406",
+    "code": "5406",
+    "name": "ME - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5407",
+    "code": "5407",
+    "name": "ME - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5408",
+    "code": "5408",
+    "name": "ME - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5409",
+    "code": "5409",
+    "name": "ME - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5410",
+    "code": "5410",
+    "name": "ME - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5411",
+    "code": "5411",
+    "name": "ME - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5412",
+    "code": "5412",
+    "name": "ME - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5413",
+    "code": "5413",
+    "name": "ME - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5414",
+    "code": "5414",
+    "name": "ME - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5415",
+    "code": "5415",
+    "name": "ME - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5416",
+    "code": "5416",
+    "name": "ME - Office Equipment Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5417",
+    "code": "5417",
+    "name": "ME - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5418",
+    "code": "5418",
+    "name": "ME - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5419",
+    "code": "5419",
+    "name": "ME - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5420",
+    "code": "5420",
+    "name": "ME - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5421",
+    "code": "5421",
+    "name": "ME - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5422",
+    "code": "5422",
+    "name": "ME - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5423",
+    "code": "5423",
+    "name": "ME - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5424",
+    "code": "5424",
+    "name": "ME - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5425",
+    "code": "5425",
+    "name": "ME - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5426",
+    "code": "5426",
+    "name": "ME - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5500",
+    "code": "5500",
+    "name": "Sales Department Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5501",
+    "code": "5501",
+    "name": "SE - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5502",
+    "code": "5502",
+    "name": "SE - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5503",
+    "code": "5503",
+    "name": "SE - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5504",
+    "code": "5504",
+    "name": "SE - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5505",
+    "code": "5505",
+    "name": "SE - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5506",
+    "code": "5506",
+    "name": "SE - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5507",
+    "code": "5507",
+    "name": "SE - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5508",
+    "code": "5508",
+    "name": "SE - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5509",
+    "code": "5509",
+    "name": "SE - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5510",
+    "code": "5510",
+    "name": "SE - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5511",
+    "code": "5511",
+    "name": "SE - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5512",
+    "code": "5512",
+    "name": "SE - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5513",
+    "code": "5513",
+    "name": "SE - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5514",
+    "code": "5514",
+    "name": "SE - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5515",
+    "code": "5515",
+    "name": "SE - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5516",
+    "code": "5516",
+    "name": "SE - Office Equipment Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5517",
+    "code": "5517",
+    "name": "SE - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5518",
+    "code": "5518",
+    "name": "SE - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5519",
+    "code": "5519",
+    "name": "SE - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5520",
+    "code": "5520",
+    "name": "SE - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5521",
+    "code": "5521",
+    "name": "SE - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5522",
+    "code": "5522",
+    "name": "SE - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5523",
+    "code": "5523",
+    "name": "SE - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5524",
+    "code": "5524",
+    "name": "SE - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5525",
+    "code": "5525",
+    "name": "SE - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5526",
+    "code": "5526",
+    "name": "SE - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5600",
+    "code": "5600",
+    "name": "Chiefs Expense - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5601",
+    "code": "5601",
+    "name": "ChiE - Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5602",
+    "code": "5602",
+    "name": "ChiE - Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5603",
+    "code": "5603",
+    "name": "ChiE - Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5604",
+    "code": "5604",
+    "name": "ChiE - Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5605",
+    "code": "5605",
+    "name": "ChiE - Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5606",
+    "code": "5606",
+    "name": "ChiE - Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5607",
+    "code": "5607",
+    "name": "ChiE - Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5608",
+    "code": "5608",
+    "name": "ChiE - Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5609",
+    "code": "5609",
+    "name": "ChiE - Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5610",
+    "code": "5610",
+    "name": "ChiE - Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5611",
+    "code": "5611",
+    "name": "ChiE - Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5612",
+    "code": "5612",
+    "name": "ChiE - Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5613",
+    "code": "5613",
+    "name": "ChiE - Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5614",
+    "code": "5614",
+    "name": "ChiE - Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5615",
+    "code": "5615",
+    "name": "ChiE - Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5616",
+    "code": "5616",
+    "name": "ChiE_Office_Equipment_Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5617",
+    "code": "5617",
+    "name": "ChiE - Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5618",
+    "code": "5618",
+    "name": "ChiE - Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5619",
+    "code": "5619",
+    "name": "ChiE - Salaries & Wages",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5620",
+    "code": "5620",
+    "name": "ChiE - Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5621",
+    "code": "5621",
+    "name": "ChiE - Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5622",
+    "code": "5622",
+    "name": "ChiE - Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5623",
+    "code": "5623",
+    "name": "ChiE - Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5624",
+    "code": "5624",
+    "name": "ChiE - Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5625",
+    "code": "5625",
+    "name": "ChiE - Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "5626",
+    "code": "5626",
+    "name": "ChiE - Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6000",
+    "code": "6000",
+    "name": "Company Expenses - General",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6001",
+    "code": "6001",
+    "name": "Advertising & Marketing",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6002",
+    "code": "6002",
+    "name": "Meals & Entertainment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6003",
+    "code": "6003",
+    "name": "Bank Fees & Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6004",
+    "code": "6004",
+    "name": "Travel Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6005",
+    "code": "6005",
+    "name": "Lodging Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6006",
+    "code": "6006",
+    "name": "Mileage Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6007",
+    "code": "6007",
+    "name": "Telephone Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6008",
+    "code": "6008",
+    "name": "Internet & Subcription Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6009",
+    "code": "6009",
+    "name": "Electricity & Utilities",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6010",
+    "code": "6010",
+    "name": "Rent Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6011",
+    "code": "6011",
+    "name": "Janitorial & Cleaning",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6012",
+    "code": "6012",
+    "name": "Security Services",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6013",
+    "code": "6013",
+    "name": "Office Supplies Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6014",
+    "code": "6014",
+    "name": "Postage & Shipping",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6015",
+    "code": "6015",
+    "name": "Repairs & Maintenance",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6016",
+    "code": "6016",
+    "name": "Depreciation Expense - Office Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6017",
+    "code": "6017",
+    "name": "Depreciation Expense - Store Equipment",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6018",
+    "code": "6018",
+    "name": "Salaries & Wages Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6019",
+    "code": "6019",
+    "name": "Freelance/Service Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6020",
+    "code": "6020",
+    "name": "Employee Benefits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6021",
+    "code": "6021",
+    "name": "Employee Allowances",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6022",
+    "code": "6022",
+    "name": "Professional Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6023",
+    "code": "6023",
+    "name": "Service Fees",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6024",
+    "code": "6024",
+    "name": "Government Fees & Permits",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6025",
+    "code": "6025",
+    "name": "Taxes & Licenses",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6026",
+    "code": "6026",
+    "name": "Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6027",
+    "code": "6027",
+    "name": "Credit Card Charges",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6028",
+    "code": "6028",
+    "name": "Bad Debt Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6029",
+    "code": "6029",
+    "name": "Purchase Discounts",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6030",
+    "code": "6030",
+    "name": "Automobile Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6031",
+    "code": "6031",
+    "name": "Parking Fees Expense",
+    "type": "Expense",
+    "normal": "Debit"
+  },
+  {
+    "id": "6032",
+    "code": "6032",
+    "name": "Training & Development",
+    "type": "Expense",
+    "normal": "Debit"
+  }
+]
