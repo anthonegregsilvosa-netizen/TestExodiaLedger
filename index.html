@@ -55,238 +55,229 @@
 <!-- ========================= APP ========================= -->
 <div id="app" style="display:none;">
 
-<header style="padding:12px; border-bottom:1px solid #ccc;">
-  <button onclick="show('coa')">Chart of Accounts</button>
-  <button onclick="show('journal')">Journal Entry</button>
-  <button onclick="show('ledger')">General Ledger</button>
-  <button onclick="show('trial')">Trial Balance</button>
-  <button onclick="show('journal-history')">Journal History</button>
-</header>
+  <header style="padding:12px; border-bottom:1px solid #ccc;">
+    <button onclick="show('coa')">Chart of Accounts</button>
+    <button onclick="show('journal')">Journal Entry</button>
+    <button onclick="show('ledger')">General Ledger</button>
+    <button onclick="show('trial')">Trial Balance</button>
+    <button onclick="show('journal-history')">Journal History</button>
+  </header>
 
-  <!-- COA OPTIONS BAR (only shows on Chart of Accounts tab) -->
-<div id="coa-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
-  <b>Chart of Accounts Options:</b>
-  <button onclick="focusAddAccount()">+ Add Account</button>
-  <button onclick="editSelectedCOA()">Edit Selected</button>
-  <button onclick="deleteSelectedCOA()">Delete Selected</button>
-  <span id="coa-selected-label" style="margin-left:10px; color:#555;"></span>
-</div>
-  
-<div style="margin:10px 0;">
-  Year:
-  <select id="filter-year" onchange="applyDateFilter()"></select>
-
-  Month:
-  <select id="filter-month" onchange="applyDateFilter()">
-    <option value="">All</option>
-    <option value="1">Jan</option>
-    <option value="2">Feb</option>
-    <option value="3">Mar</option>
-    <option value="4">Apr</option>
-    <option value="5">May</option>
-    <option value="6">Jun</option>
-    <option value="7">Jul</option>
-    <option value="8">Aug</option>
-    <option value="9">Sep</option>
-    <option value="10">Oct</option>
-    <option value="11">Nov</option>
-    <option value="12">Dec</option>
-  </select>
-</div>
-
-<!-- ========================= COA ========================= -->
-<section id="coa">
-  <h2>Chart of Accounts</h2>
-
-  <div id="filters" style="margin:10px 0;">
-    <button onclick="filterCOA('All')">All</button>
-    <button onclick="filterCOA('Asset')">Assets</button>
-    <button onclick="filterCOA('Liability')">Liabilities</button>
-    <button onclick="filterCOA('Equity')">Equity</button>
-    <button onclick="filterCOA('Revenue')">Revenue</button>
-    <button onclick="filterCOA('Expense')">Expenses</button>
+  <!-- ✅ COA OPTIONS BAR (only show on COA tab via JS) -->
+  <div id="coa-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
+    <b>Chart of Accounts Options:</b>
+    <button onclick="focusAddAccount()">+ Add Account</button>
+    <button onclick="editSelectedCOA()">Edit Selected</button>
+    <button onclick="deleteSelectedCOA()">Delete Selected</button>
+    <span id="coa-selected-label" style="margin-left:10px; color:#555;"></span>
   </div>
 
-  <div style="margin:10px 0; display:flex; gap:8px; flex-wrap:wrap; align-items:end;">
-    <label>Code<br><input id="coa-code" type="text" placeholder="1001"></label>
-    <label>Name<br><input id="coa-name" type="text" placeholder="Cash in Bank"></label>
+  <!-- ✅ Year/Month stays always -->
+  <div style="margin:10px 0;">
+    Year:
+    <select id="filter-year" onchange="applyDateFilter()"></select>
 
-    <label>Type<br>
-      <select id="coa-type">
-        <option>Asset</option>
-        <option>Liability</option>
-        <option>Equity</option>
-        <option>Revenue</option>
-        <option>Expense</option>
-      </select>
-    </label>
-
-    <label>Normal<br>
-      <select id="coa-normal">
-        <option>Debit</option>
-        <option>Credit</option>
-      </select>
-    </label>
-
-    <button onclick="addCOAAccount()">Add Account</button>
+    Month:
+    <select id="filter-month" onchange="applyDateFilter()">
+      <option value="">All</option>
+      <option value="1">Jan</option>
+      <option value="2">Feb</option>
+      <option value="3">Mar</option>
+      <option value="4">Apr</option>
+      <option value="5">May</option>
+      <option value="6">Jun</option>
+      <option value="7">Jul</option>
+      <option value="8">Aug</option>
+      <option value="9">Sep</option>
+      <option value="10">Oct</option>
+      <option value="11">Nov</option>
+      <option value="12">Dec</option>
+    </select>
   </div>
 
-  tr.innerHTML = `
-  <td style="text-align:center;">
-    <input type="radio" name="coaPick" onchange="selectCOA('${a.id}')">
-  </td>
-  <td>${esc(a.code)}</td>
-  ...
-`;
+  <!-- ========================= COA ========================= -->
+  <section id="coa">
+    <h2>Chart of Accounts</h2>
 
-  <table border="1" cellpadding="6">
-    <thead>
-  <tr>
-    <th>Select</th>
-    <th>Code</th>
-    <th>Account Name</th>
-    <th>Type</th>
-    <th>Normal</th>
-    <th>Balance</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-    <tbody id="coa-body"></tbody>
-  </table>
-</section>
+    <div id="filters" style="margin:10px 0;">
+      <button onclick="filterCOA('All')">All</button>
+      <button onclick="filterCOA('Asset')">Assets</button>
+      <button onclick="filterCOA('Liability')">Liabilities</button>
+      <button onclick="filterCOA('Equity')">Equity</button>
+      <button onclick="filterCOA('Revenue')">Revenue</button>
+      <button onclick="filterCOA('Expense')">Expenses</button>
+    </div>
 
-<!-- ========================= JOURNAL ========================= -->
-<section id="journal" style="display:none;">
-  <h2>Journal Entry</h2>
+    <div style="margin:10px 0; display:flex; gap:8px; flex-wrap:wrap; align-items:end;">
+      <label>Code<br><input id="coa-code" type="text" placeholder="1001"></label>
+      <label>Name<br><input id="coa-name" type="text" placeholder="Cash in Bank"></label>
 
-  <div style="display:grid; grid-template-columns: 220px 1fr; gap:8px; max-width:900px;">
-    <label>Date *
-      <input type="date" id="je-date">
-    </label>
+      <label>Type<br>
+        <select id="coa-type">
+          <option>Asset</option>
+          <option>Liability</option>
+          <option>Equity</option>
+          <option>Revenue</option>
+          <option>Expense</option>
+        </select>
+      </label>
 
-    <label style="grid-column:1 / span 2;">
-      Reference No. *
-      <input type="text" id="je-refno">
-    </label>
+      <label>Normal<br>
+        <select id="coa-normal">
+          <option>Debit</option>
+          <option>Credit</option>
+        </select>
+      </label>
 
-    <label style="grid-column:1 / span 2;">
-      Description *
-      <input type="text" id="je-description">
-    </label>
+      <button onclick="addCOAAccount()">Add Account</button>
+    </div>
 
-    <label style="grid-column:1 / span 2;">
-      Department / Cost Center:
-      <input type="text" id="je-dept">
-    </label>
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Code</th>
+          <th>Account Name</th>
+          <th>Type</th>
+          <th>Normal</th>
+          <th>Balance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="coa-body"></tbody>
+    </table>
+  </section>
 
-    <label style="grid-column:1 / span 2;">
-      Payment Method:
-      <input type="text" id="je-paymethod">
-    </label>
+  <!-- ========================= JOURNAL ========================= -->
+  <section id="journal" style="display:none;">
+    <h2>Journal Entry</h2>
 
-    <label style="grid-column:1 / span 2;">
-      Client / Vendor:
-      <input type="text" id="je-client">
-    </label>
+    <div style="display:grid; grid-template-columns: 220px 1fr; gap:8px; max-width:900px;">
+      <label>Date *
+        <input type="date" id="je-date">
+      </label>
 
-    <label style="grid-column:1 / span 2;">
-      Remarks:
-      <input type="text" id="je-remarks">
-    </label>
-  </div>
+      <label style="grid-column:1 / span 2;">
+        Reference No. *
+        <input type="text" id="je-refno">
+      </label>
 
-  <br>
+      <label style="grid-column:1 / span 2;">
+        Description *
+        <input type="text" id="je-description">
+      </label>
 
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Account</th>
-        <th>Debit</th>
-        <th>Credit</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="je-lines"></tbody>
-  </table>
+      <label style="grid-column:1 / span 2;">
+        Department / Cost Center:
+        <input type="text" id="je-dept">
+      </label>
 
-  <button onclick="addLine()">Add Line</button>
-  <button onclick="saveJournal()">Save Journal Entry</button>
+      <label style="grid-column:1 / span 2;">
+        Payment Method:
+        <input type="text" id="je-paymethod">
+      </label>
 
-  <p id="je-status"></p>
-</section>
+      <label style="grid-column:1 / span 2;">
+        Client / Vendor:
+        <input type="text" id="je-client">
+      </label>
 
-<!-- ========================= LEDGER ========================= -->
-<section id="ledger" style="display:none;">
-  <h2>General Ledger</h2>
+      <label style="grid-column:1 / span 2;">
+        Remarks:
+        <input type="text" id="je-remarks">
+      </label>
+    </div>
 
-  <select id="ledger-account" onchange="renderLedger()"></select>
+    <br>
 
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Ref</th>
-        <th>Debit</th>
-        <th>Credit</th>
-        <th>Running Balance</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="ledger-body"></tbody>
-  </table>
-</section>
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="je-lines"></tbody>
+    </table>
 
-<!-- ========================= TRIAL BALANCE ========================= -->
-<section id="trial" style="display:none;">
-  <h2>Trial Balance</h2>
+    <button onclick="addLine()">Add Line</button>
+    <button onclick="saveJournal()">Save Journal Entry</button>
 
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Code</th>
-        <th>Account Name</th>
-        <th>Type</th>
-        <th style="text-align:right;">Debit</th>
-        <th style="text-align:right;">Credit</th>
-      </tr>
-    </thead>
-    <tbody id="tb-body"></tbody>
-    <tfoot>
-      <tr>
-        <td colspan="3"><b>Total</b></td>
-        <td id="tb-total-debit" style="text-align:right;"><b>0.00</b></td>
-        <td id="tb-total-credit" style="text-align:right;"><b>0.00</b></td>
-      </tr>
-    </tfoot>
-  </table>
+    <p id="je-status"></p>
+  </section>
 
-  <p id="tb-status"></p>
-</section>
+  <!-- ========================= LEDGER ========================= -->
+  <section id="ledger" style="display:none;">
+    <h2>General Ledger</h2>
 
-  <!-- =========================
-     HISTORY
-========================= -->
-<section id="journal-history" style="display:none;">
-  <h2>Journal History</h2>
+    <select id="ledger-account" onchange="renderLedger()"></select>
 
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Entry Date</th>
-        <th>Saved Time</th>
-        <th>Ref</th>
-        <th>Description</th>
-        <th>Department</th>
-        <th>Payment Method</th>
-        <th>Client/Vendor</th>
-        <th>Remarks</th>
-      </tr>
-    </thead>
-    <tbody id="history-body"></tbody>
-  </table>
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Ref</th>
+          <th>Debit</th>
+          <th>Credit</th>
+          <th>Running Balance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ledger-body"></tbody>
+    </table>
+  </section>
 
-  <p id="history-status"></p>
-</section>
+  <!-- ========================= TRIAL ========================= -->
+  <section id="trial" style="display:none;">
+    <h2>Trial Balance</h2>
+
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Account Name</th>
+          <th>Type</th>
+          <th style="text-align:right;">Debit</th>
+          <th style="text-align:right;">Credit</th>
+        </tr>
+      </thead>
+      <tbody id="tb-body"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3"><b>Total</b></td>
+          <td id="tb-total-debit" style="text-align:right;"><b>0.00</b></td>
+          <td id="tb-total-credit" style="text-align:right;"><b>0.00</b></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p id="tb-status"></p>
+  </section>
+
+  <!-- ========================= HISTORY ========================= -->
+  <section id="journal-history" style="display:none;">
+    <h2>Journal History</h2>
+
+    <table border="1" cellpadding="6">
+      <thead>
+        <tr>
+          <th>Entry Date</th>
+          <th>Saved Time</th>
+          <th>Ref</th>
+          <th>Description</th>
+          <th>Department</th>
+          <th>Payment Method</th>
+          <th>Client/Vendor</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody id="history-body"></tbody>
+    </table>
+
+    <p id="history-status"></p>
+  </section>
 
 </div>
 
