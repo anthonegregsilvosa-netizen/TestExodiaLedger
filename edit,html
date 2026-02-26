@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Journal Entry</title>
+
+  <!-- Supabase JS (same as your index.html uses) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; }
+    .row { display: grid; grid-template-columns: 220px 1fr; gap: 10px; max-width: 900px; }
+    label { display: grid; gap: 6px; margin-bottom: 10px; }
+    input, select, textarea { padding: 10px; font-size: 16px; width: 100%; box-sizing: border-box; }
+    textarea { min-height: 90px; resize: vertical; }
+    table { border-collapse: collapse; width: 900px; max-width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #999; padding: 8px; }
+    th { background: #f3f3f3; }
+    .right { text-align: right; }
+    .btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 14px; cursor: pointer; }
+    .danger { background: #b00020; color: white; border: none; }
+    .muted { color: #666; }
+    .status { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+
+<body>
+  <h2>Edit Journal Entry</h2>
+
+  <div class="row">
+    <label>
+      Date <span style="color:crimson">*</span>
+      <input type="date" id="e-date" />
+    </label>
+
+    <label>
+      Reference No. <span style="color:crimson">*</span>
+      <input type="text" id="e-ref" />
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Description <span style="color:crimson">*</span>
+      <input type="text" id="e-desc" />
+    </label>
+
+    <label>
+      Department / Cost Center
+      <input type="text" id="e-dept" />
+    </label>
+
+    <label>
+      Payment Method
+      <input type="text" id="e-pay" />
+    </label>
+
+    <label>
+      Client / Vendor
+      <input type="text" id="e-client" />
+    </label>
+
+    <label style="grid-column:1 / span 2;">
+      Remarks
+      <textarea id="e-remarks"></textarea>
+    </label>
+  </div>
+
+  <h3>Lines</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 55%;">Account</th>
+        <th style="width: 20%;">Debit</th>
+        <th style="width: 20%;">Credit</th>
+        <th style="width: 5%;">X</th>
+      </tr>
+    </thead>
+    <tbody id="e-lines"></tbody>
+  </table>
+
+  <div class="btns">
+    <button id="btn-add">Add Line</button>
+    <button id="btn-save">Save Changes</button>
+    <button id="btn-delete" class="danger">Delete Entry</button>
+    <button id="btn-back">Back to Ledger</button>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <script src="./edit.js"></script>
+</body>
+</html>
