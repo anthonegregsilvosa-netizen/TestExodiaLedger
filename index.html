@@ -65,12 +65,9 @@
 
   <!-- ✅ COA OPTIONS BAR (only show on COA tab via JS) -->
   <div id="coa-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
-    <b>Chart of Accounts Options:</b>
-   <button onclick="addAccountPopup()">+ Add Account</button>
-    <button onclick="editSelectedCOA()">Edit Selected</button>
-    <button onclick="deleteSelectedCOA()">Delete Selected</button>
-    <span id="coa-selected-label" style="margin-left:10px; color:#555;"></span>
-  </div>
+  <b>Chart of Accounts Options:</b>
+  <button onclick="addAccountPrompt()">+ Add Account</button>
+</div>
 
   <!-- ✅ Year/Month stays always -->
   <div style="margin:10px 0;">
@@ -133,17 +130,16 @@
     </div>
 
     <table border="1" cellpadding="6">
-      <thead>
-        <tr>
-          <th>Select</th>
-          <th>Code</th>
-          <th>Account Name</th>
-          <th>Type</th>
-          <th>Normal</th>
-          <th>Balance</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+     <thead>
+  <tr>
+    <th>Code</th>
+    <th>Account Name</th>
+    <th>Type</th>
+    <th>Normal</th>
+    <th>Balance</th>
+    <th>Actions</th>
+  </tr>
+</thead>
       <tbody id="coa-body"></tbody>
     </table>
   </section>
