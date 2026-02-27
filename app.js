@@ -1176,10 +1176,8 @@ function closeAllCoaMenus() {
 
 window.toggleCoaMenu = function (id, ev) {
   ev?.stopPropagation?.();
-
   const menu = document.querySelector(`[data-coa-menu='${id}']`);
   if (!menu) return;
-
   const isOpen = menu.style.display === "block";
   closeAllCoaMenus();
   menu.style.display = isOpen ? "none" : "block";
