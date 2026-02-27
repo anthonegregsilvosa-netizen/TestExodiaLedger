@@ -1336,3 +1336,49 @@ window.deleteSelectedCOA = function () {
   if (!selectedCOAId) return alert("Select an account first.");
   deleteCOAAccount(selectedCOAId);
 };
+
+// ==============================
+// ADD ACCOUNT POPUP (LIKE EDIT)
+// ==============================
+window.addAccountPopup = async function () {
+  if (!currentUser) return alert("Please login first.");
+
+  const code = (prompt("Account Code (e.g. 1001):") || "").trim();
+  if (!code) return;
+
+  const name = (prompt(`Account Name for ${code}:`) || "").trim();
+  if (!name) return;
+
+  const type = (prompt("Account Type (Asset/Liability/Equity/Revenue/Expense):", "Asset") || "").trim();
+  if (!type) return;
+
+  const normal = (prompt("Normal Balance (Debit/Credit):", "Debit") || "").trim();
+  if (!normal) return;
+
+  try {
+    await sbInsertCOA({
+      user_id: currentUser.id,
+      code,
+      name,
+      type,
+      normal,
+      is_deleted: false,
+    });
+
+    COA = await sbFetchCOA();
+    refreshCoaDatalist();
+    resolveLinesAccountIds();
+
+    const ledgerSel = $("ledger-account");
+    if (ledgerSel) ledgerSel.innerHTML = "";
+
+    renderCOA();
+    renderLedger();
+    renderTrialBalance();
+
+    alert("✅ Account added successfully!");
+  } catch (e) {
+    console.error(e);
+    alert("❌ Failed to add account (maybe duplicate code).");
+  }
+};
