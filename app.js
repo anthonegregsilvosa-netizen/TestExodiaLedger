@@ -770,15 +770,14 @@ function renderCOA() {
       <td>${esc(a.type)}</td>
       <td>${esc(a.normal)}</td>
       <td style="text-align:right;">${money(bal)}</td>
-      <td style="position:relative;">
-        <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}')">Action</button>
+     <td style="position:relative; text-align:right;">
+  <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}', event)">⋯</button>
 
-        <div class="coa-menu" data-coa-menu="${a.id}"
-             style="display:none; position:absolute; right:0; top:32px; border:1px solid #aaa; background:#fff; padding:6px; z-index:99;">
-          <button onclick="editAccountPrompt('${a.id}')">Edit Name</button>
-          <button onclick="deleteCOAAccount('${a.id}')">Delete</button>
-        </div>
-      </td>
+  <div class="coa-menu" data-coa-menu="${a.id}">
+    <button onclick="editAccountPrompt('${a.id}')">✏️ Edit name</button>
+    <button class="danger" onclick="deleteCOAAccount('${a.id}')">🗑 Delete</button>
+  </div>
+</td>
     `;
 
     tbody.appendChild(tr);
@@ -1175,7 +1174,9 @@ function closeAllCoaMenus() {
   document.querySelectorAll(".coa-menu").forEach((m) => (m.style.display = "none"));
 }
 
-window.toggleCoaMenu = function (id) {
+window.toggleCoaMenu = function (id, ev) {
+  ev?.stopPropagation?.();
+
   const menu = document.querySelector(`[data-coa-menu='${id}']`);
   if (!menu) return;
 
