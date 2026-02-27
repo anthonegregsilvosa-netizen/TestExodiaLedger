@@ -491,53 +491,6 @@ window.filterCOA = function (type) {
   renderCOA();
 };
 
-// ==============================
-// COA ADD / EDIT (Prompt based)
-// ==============================
-window.addAccountPrompt = async function addAccountPrompt() {
-  if (!currentUser) return alert("Please login first.");
-
-  const code = (prompt("Account Code (e.g., 1001):") || "").trim();
-  if (!code) return;
-
-  const name = (prompt("Account Name:") || "").trim();
-  if (!name) return;
-
-  const type = (prompt("Account Type (Asset/Liability/Equity/Revenue/Expense):") || "").trim();
-  if (!type) return;
-
-  const normal = (prompt("Normal (Debit/Credit):") || "").trim();
-  if (!normal) return;
-
-  try {
-    await sbInsertCOA({
-      user_id: currentUser.id,
-      code,
-      name,
-      type,
-      normal,
-      is_deleted: false,
-    });
-
-    COA = await sbFetchCOA();
-    refreshCoaDatalist();
-    resolveLinesAccountIds();
-
-    // reset ledger dropdown
-    const ledgerSel = $("ledger-account");
-    if (ledgerSel) ledgerSel.innerHTML = "";
-
-    renderCOA();
-    renderLedger();
-    renderTrialBalance();
-
-    alert("✅ Account added!");
-  } catch (e) {
-    console.error(e);
-    alert("❌ Failed to add account. Check unique code / policies.");
-  }
-};
-
 window.editAccountPrompt = async function editAccountPrompt(accountId) {
   if (!currentUser) return alert("Please login first.");
   const acct = COA.find((a) => a.id === accountId);
@@ -810,28 +763,23 @@ function renderCOA() {
     const bal = balances[a.id] || 0;
 
     const tr = document.createElement("tr");
-    tr.setAttribute("data-coa-row", a.id);
 
     tr.innerHTML = `
-  <td style="text-align:center;">
-    <input type="radio" name="coaPick" onchange="selectCOA('${a.id}')">
-  </td>
+      <td>${esc(a.code)}</td>
+      <td>${esc(a.name)}</td>
+      <td>${esc(a.type)}</td>
+      <td>${esc(a.normal)}</td>
+      <td style="text-align:right;">${money(bal)}</td>
+      <td style="position:relative;">
+        <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}')">Action</button>
 
-  <td>${esc(a.code)}</td>
-
-  <td>${esc(a.name)}</td>
-
-  <td>${esc(a.type)}</td>
-
-  <td>${esc(a.normal)}</td>
-
-  <td style="text-align:right;">${money(bal)}</td>
-
-  <td>
-    <button onclick="editAccountPrompt('${a.id}')">Edit</button>
-    <button onclick="deleteCOAAccount('${a.id}')">Delete</button>
-  </td>
-`;
+        <div class="coa-menu" data-coa-menu="${a.id}"
+             style="display:none; position:absolute; right:0; top:32px; border:1px solid #aaa; background:#fff; padding:6px; z-index:99;">
+          <button onclick="editAccountPrompt('${a.id}')">Edit Name</button>
+          <button onclick="deleteCOAAccount('${a.id}')">Delete</button>
+        </div>
+      </td>
+    `;
 
     tbody.appendChild(tr);
   });
@@ -841,52 +789,6 @@ function renderCOA() {
     tr.innerHTML = `<td colspan="6">No accounts found for this filter.</td>`;
     tbody.appendChild(tr);
   }
-}
-
-function formatTime(ts) {
-  if (!ts) return "";
-  const d = new Date(ts);
-  return d.toLocaleString(undefined, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
-
-async function renderHistory() {
-  const tbody = $("history-body");
-  const status = $("history-status");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-  if (status) status.textContent = "Loading...";
-
-  const entries = await sbFetchJournalEntries();
-
-  if (entries.length === 0) {
-    if (status) status.textContent = "No journal entries yet.";
-    return;
-  }
-
-  entries.forEach((e) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(e.entry_date)}</td>
-      <td>${esc(formatTime(e.created_at))}</td>
-      <td>${esc(e.ref)}</td>
-      <td>${esc(e.description)}</td>
-      <td>${esc(e.department)}</td>
-      <td>${esc(e.payment_method)}</td>
-      <td>${esc(e.client_vendor)}</td>
-      <td>${esc(e.remarks)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  if (status) status.textContent = `Showing ${entries.length} entries.`;
 }
 
 // ==============================
@@ -1224,25 +1126,6 @@ function esc(s) {
   });
 });
 
-let selectedCOAId = "";
-
-window.selectCOA = function (id) {
-  selectedCOAId = id || "";
-  const label = $("coa-selected-label");
-  const acct = COA.find(a => a.id === selectedCOAId);
-  if (label) label.textContent = acct ? `Selected: ${acct.code} - ${acct.name}` : "";
-};
-
-window.focusAddAccount = function () {
-  show("coa");
-  $("coa-code")?.focus();
-};
-
-window.editSelectedCOA = function () {
-  if (!selectedCOAId) return alert("Select an account first.");
-  editAccountPrompt(selectedCOAId); // ✅ popup prompt style
-};
-
 // ==============================
 // INLINE EDIT COA NAME (no prompt)
 // ==============================
@@ -1287,6 +1170,26 @@ window.saveEditCOAName = async function (id) {
     alert("Failed to update account name.");
   }
 };
+
+function closeAllCoaMenus() {
+  document.querySelectorAll(".coa-menu").forEach((m) => (m.style.display = "none"));
+}
+
+window.toggleCoaMenu = function (id) {
+  const menu = document.querySelector(`[data-coa-menu='${id}']`);
+  if (!menu) return;
+
+  const isOpen = menu.style.display === "block";
+  closeAllCoaMenus();
+  menu.style.display = isOpen ? "none" : "block";
+};
+
+// close menu when clicking anywhere else
+document.addEventListener("click", (e) => {
+  const isActionBtn = e.target?.closest?.(".coa-action-btn");
+  const isMenu = e.target?.closest?.(".coa-menu");
+  if (!isActionBtn && !isMenu) closeAllCoaMenus();
+});
 
 // ==============================
 // DELETE COA ACCOUNT (soft delete)
