@@ -75,6 +75,92 @@
 .coa-menu .danger:hover{
   background:#ffe9ee;
 }
+
+/* ADD ACCOUNT MODAL */
+.modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: grid;
+  place-items: center;
+  z-index: 2000;
+}
+
+.modal-card{
+  width: 480px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.modal-header{
+  display: flex;
+  justify-content: space-between;
+  padding: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-title{ font-weight: bold; font-size: 16px; }
+.modal-sub{ font-size: 12px; color:#666; }
+
+.modal-x{
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-body{ padding: 14px; }
+
+.modal-label{
+  font-size: 12px;
+  display:block;
+  margin-top:10px;
+}
+
+.modal-input{
+  width:100%;
+  padding:8px;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
+
+.modal-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+
+.modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid #eee;
+}
+
+.btn{
+  padding:8px 12px;
+  border:1px solid #aaa;
+  background:#fff;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background:#333;
+  color:#fff;
+  border-color:#333;
+}
+
+.modal-msg{
+  color:#b00020;
+  font-size:12px;
+  margin-top:8px;
+}
+    
   </style>
 </head>
 
@@ -111,7 +197,7 @@
   <!-- ✅ COA OPTIONS BAR (only show on COA tab via JS) -->
 <div id="coa-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
   <b>Chart of Accounts Options:</b>
-  <button onclick="addAccountPopup()">+ Add Account</button>
+  <button onclick="openAddCoaModal()">+ Add Account</button>
 </div>
 
   <!-- ✅ Year/Month stays always -->
@@ -319,7 +405,55 @@
 
     <p id="history-status"></p>
   </section>
+</div>
 
+  <!-- ========================= ADD ACCOUNT MODAL ========================= -->
+<div id="addcoa-modal" class="modal-backdrop" style="display:none;">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Add Chart of Account</div>
+        <div class="modal-sub">Fill details then click Save.</div>
+      </div>
+      <button class="modal-x" onclick="closeAddCoaModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label">Account Code *</label>
+      <input id="addcoa-code" class="modal-input" type="text" placeholder="1001">
+
+      <label class="modal-label">Account Name *</label>
+      <input id="addcoa-name" class="modal-input" type="text" placeholder="Cash on Hand">
+
+      <div class="modal-grid">
+        <div>
+          <label class="modal-label">Type</label>
+          <select id="addcoa-type" class="modal-input">
+            <option>Asset</option>
+            <option>Liability</option>
+            <option>Equity</option>
+            <option>Revenue</option>
+            <option>Expense</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="modal-label">Normal</label>
+          <select id="addcoa-normal" class="modal-input">
+            <option>Debit</option>
+            <option>Credit</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="addcoa-msg" class="modal-msg"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="closeAddCoaModal()">Cancel</button>
+      <button class="btn primary" onclick="saveAddCoaModal()">Save</button>
+    </div>
+  </div>
 </div>
 
 <!-- ========================= SCRIPTS ========================= -->
