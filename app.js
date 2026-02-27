@@ -1287,11 +1287,12 @@ window.addAccountPopup = async function () {
 
 window.openAddCoaModal = function () {
   $("addcoa-modal").style.display = "grid";
-  $("addcoa-code").value = "";
+  $("addcoa-code").value = getNextAccountCode();   // ✅ auto next
   $("addcoa-name").value = "";
   $("addcoa-type").value = "Asset";
   $("addcoa-normal").value = "Debit";
   $("addcoa-msg").textContent = "";
+  $("addcoa-name").focus();
 };
 
 window.closeAddCoaModal = function () {
@@ -1303,6 +1304,11 @@ window.saveAddCoaModal = async function () {
   const name = $("addcoa-name").value.trim();
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
+const exists = COA.some(a => String(a.code).trim() === code);
+if (exists) {
+  $("addcoa-msg").textContent = `Code ${code} already exists. Try ${getNextAccountCode()} instead.`;
+  return;
+}
 
   if (!code || !name) {
     $("addcoa-msg").textContent = "Code and Name are required.";
@@ -1323,7 +1329,21 @@ window.saveAddCoaModal = async function () {
     renderCOA();
     closeAddCoaModal();
   } catch (e) {
-    console.error(e);
-    $("addcoa-msg").textContent = "Failed to add account (maybe duplicate code).";
+  console.error(e);
+  // supabase error code 23505 = duplicate
+  if (e?.code === "23505") {
+    $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
+    return;
   }
+  $("addcoa-msg").textContent = "Failed to add account. Check your connection/policies.";
+}
 };
+
+function getNextAccountCode() {
+  const codes = (COA || [])
+    .map(a => Number(String(a.code || "").replace(/[^0-9]/g, "")))
+    .filter(n => Number.isFinite(n));
+
+  if (codes.length === 0) return "1001";
+  return String(Math.max(...codes) + 1);
+}
