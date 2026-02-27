@@ -1284,3 +1284,46 @@ window.addAccountPopup = async function () {
     alert("❌ Failed to add account (maybe duplicate code).");
   }
 };
+
+window.openAddCoaModal = function () {
+  $("addcoa-modal").style.display = "grid";
+  $("addcoa-code").value = "";
+  $("addcoa-name").value = "";
+  $("addcoa-type").value = "Asset";
+  $("addcoa-normal").value = "Debit";
+  $("addcoa-msg").textContent = "";
+};
+
+window.closeAddCoaModal = function () {
+  $("addcoa-modal").style.display = "none";
+};
+
+window.saveAddCoaModal = async function () {
+  const code = $("addcoa-code").value.trim();
+  const name = $("addcoa-name").value.trim();
+  const type = $("addcoa-type").value;
+  const normal = $("addcoa-normal").value;
+
+  if (!code || !name) {
+    $("addcoa-msg").textContent = "Code and Name are required.";
+    return;
+  }
+
+  try {
+    await sbInsertCOA({
+      user_id: currentUser.id,
+      code,
+      name,
+      type,
+      normal,
+      is_deleted: false,
+    });
+
+    COA = await sbFetchCOA();
+    renderCOA();
+    closeAddCoaModal();
+  } catch (e) {
+    console.error(e);
+    $("addcoa-msg").textContent = "Failed to add account (maybe duplicate code).";
+  }
+};
