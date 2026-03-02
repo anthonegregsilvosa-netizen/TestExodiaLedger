@@ -1091,6 +1091,7 @@ if (window.location.hash === "#ledger") {
 } else {
   show(lastView);
 }
+} // ✅ THIS closes initAppAfterLogin()
 
 // ==============================
 // Render Journal History ✅
@@ -1173,6 +1174,12 @@ function formatDateTime(iso) {
 // ==============================
 // Helpers / Utils
 // ==============================
+
+function getQueryParam(name) {
+  const u = new URL(window.location.href);
+  return u.searchParams.get(name) || "";
+}
+  
 function tdWrap(el, right = false) {
   const td = document.createElement("td");
   if (right) td.style.textAlign = "right";
@@ -1214,11 +1221,6 @@ function esc(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-function getQueryParam(name) {
-  const u = new URL(window.location.href);
-  return u.searchParams.get(name) || "";
 }
 
 // ✅ Live red-border validation for required fields
