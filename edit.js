@@ -11,7 +11,7 @@ const $ = (id) => document.getElementById(id);
 let currentUser = null;
 let COA = [];
 let journalId = "";
-let returnUrl = "./index.html";
+let returnUrl = "./index.html#ledger";
 
 // ---------- UI helpers ----------
 function setStatus(msg, isErr = false) {
@@ -30,13 +30,6 @@ function parseMoney(v) {
   const cleaned = String(v || "").replace(/[^0-9.-]/g, "");
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : 0;
-}
-
-function money(n) {
-  return (Number(n) || 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }
 
 // ---------- URL ----------
@@ -77,12 +70,10 @@ function addLineRow(account_id = "", debit = 0, credit = 0) {
   const inD = document.createElement("input");
   inD.placeholder = "0.00";
   inD.value = debit ? String(debit) : "";
-  inD.className = "right";
 
   const inC = document.createElement("input");
   inC.placeholder = "0.00";
   inC.value = credit ? String(credit) : "";
-  inC.className = "right";
 
   const del = document.createElement("button");
   del.textContent = "X";
@@ -117,7 +108,6 @@ async function requireLogin() {
   currentUser = data.session?.user || null;
 
   if (!currentUser) {
-    // go back to main page to login
     window.location.href = "./index.html";
     return false;
   }
@@ -125,15 +115,16 @@ async function requireLogin() {
 }
 
 async function loadCOA() {
+  // Prefer DB COA if you want, but JSON is ok for account_name display
   try {
     COA = await fetch("./data/coa.json").then((r) => r.json());
+    if (!Array.isArray(COA)) COA = [];
   } catch {
     COA = [];
   }
 }
 
 async function loadJournal() {
-  // Header
   const { data: entry, error: e1 } = await sb
     .from("journal_entries")
     .select("*")
@@ -160,7 +151,6 @@ async function loadJournal() {
   $("e-client").value = entry.client_vendor || "";
   $("e-remarks").value = entry.remarks || "";
 
-  // Lines
   const { data: lines, error: e2 } = await sb
     .from("journal_lines")
     .select("*")
@@ -178,7 +168,6 @@ async function loadJournal() {
   $("e-lines").innerHTML = "";
   (lines || []).forEach((l) => addLineRow(l.account_id, l.debit, l.credit));
 
-  // ensure at least 2 rows visible
   if ((lines || []).length < 2) {
     addLineRow();
     addLineRow();
@@ -191,7 +180,6 @@ async function saveChanges() {
   const ref = ($("e-ref")?.value || "").trim();
   const description = ($("e-desc")?.value || "").trim();
 
-  // required highlight
   markRequired($("e-date"), !entry_date);
   markRequired($("e-ref"), !ref);
   markRequired($("e-desc"), !description);
@@ -206,7 +194,6 @@ async function saveChanges() {
   const client_vendor = ($("e-client")?.value || "").trim();
   const remarks = ($("e-remarks")?.value || "").trim();
 
-  // collect line rows
   const rows = [...$("e-lines").querySelectorAll("tr")];
   const newLines = [];
   let totalD = 0;
@@ -215,6 +202,7 @@ async function saveChanges() {
   for (const r of rows) {
     const sel = r.querySelector("select");
     const inputs = r.querySelectorAll("input");
+
     const account_id = sel?.value || "";
     const d = parseMoney(inputs[0]?.value);
     const c = parseMoney(inputs[1]?.value);
@@ -251,7 +239,6 @@ async function saveChanges() {
     return;
   }
 
-  // 1) update header
   const { error: e1 } = await sb
     .from("journal_entries")
     .update({
@@ -273,7 +260,6 @@ async function saveChanges() {
     return;
   }
 
-  // 2) soft-delete old lines for this journal_id
   const { error: e2 } = await sb
     .from("journal_lines")
     .update({ is_deleted: true })
@@ -286,7 +272,6 @@ async function saveChanges() {
     return;
   }
 
-  // 3) insert fresh lines
   const { error: e3 } = await sb.from("journal_lines").insert(newLines);
 
   if (e3) {
@@ -295,18 +280,15 @@ async function saveChanges() {
     return;
   }
 
-  setStatus("Saved ✅ Changes applied.");
-
-setTimeout(() => {
-  window.location.href = returnUrl;
-}, 600);
+  setStatus("Saved ✅ Returning to ledger...");
+  setTimeout(() => (window.location.href = returnUrl), 600);
+}
 
 // ---------- Delete ----------
 async function deleteEntry() {
   const ok = confirm("Delete this journal entry? (It will be hidden, not permanently removed.)");
   if (!ok) return;
 
-  // soft delete header
   const { error: e1 } = await sb
     .from("journal_entries")
     .update({ is_deleted: true, updated_at: new Date().toISOString() })
@@ -319,7 +301,6 @@ async function deleteEntry() {
     return;
   }
 
-  // soft delete lines
   const { error: e2 } = await sb
     .from("journal_lines")
     .update({ is_deleted: true })
@@ -340,7 +321,11 @@ async function deleteEntry() {
 (async function boot() {
   journalId = getParam("journal_id");
   const acct = getParam("account_id");
-  returnUrl = acct ? `./index.html#ledger?account_id=${encodeURIComponent(acct)}` : "./index.html";
+
+  // ✅ correct format: query first, hash last
+  returnUrl = acct
+    ? `./index.html?account_id=${encodeURIComponent(acct)}#ledger`
+    : "./index.html#ledger";
 
   if (!journalId) {
     setStatus("Missing journal_id in URL.", true);
@@ -356,6 +341,5 @@ async function deleteEntry() {
   $("btn-add").onclick = () => addLineRow();
   $("btn-save").onclick = saveChanges;
   $("btn-delete").onclick = deleteEntry;
-  $("btn-back").onclick = () => (window.location.href = "./index.html");
+  $("btn-back").onclick = () => (window.location.href = returnUrl);
 })();
-
