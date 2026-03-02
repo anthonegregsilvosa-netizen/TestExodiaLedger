@@ -340,9 +340,7 @@ async function deleteEntry() {
 (async function boot() {
   journalId = getParam("journal_id");
   const acct = getParam("account_id");
-  returnUrl = acct
-  ? `./index.html?account_id=${encodeURIComponent(acct)}#ledger`
-  : "./index.html#ledger";
+  returnUrl = acct ? `./index.html#ledger?account_id=${encodeURIComponent(acct)}` : "./index.html";
 
   if (!journalId) {
     setStatus("Missing journal_id in URL.", true);
