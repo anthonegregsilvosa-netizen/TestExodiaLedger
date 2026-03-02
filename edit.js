@@ -296,9 +296,6 @@ async function saveChanges() {
   }
 
   setStatus("Saved ✅ Changes applied.");
-}
-
-setStatus("Saved ✅ Changes applied.");
 
 setTimeout(() => {
   window.location.href = returnUrl;
