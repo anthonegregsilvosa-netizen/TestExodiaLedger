@@ -1049,6 +1049,62 @@ async function initAppAfterLogin() {
 }
 
 // ==============================
+// Render Journal History ✅
+// ==============================
+function renderHistory() {
+  const tbody = $("history-body");
+  const status = $("history-status");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (status) status.textContent = "Loading...";
+
+  if (!currentUser) {
+    if (status) status.textContent = "Please login first.";
+    return;
+  }
+
+  sbFetchJournalEntries()
+    .then((entries) => {
+      tbody.innerHTML = "";
+
+      if (!entries || entries.length === 0) {
+        if (status) status.textContent = "No journal entries found.";
+        return;
+      }
+
+      if (status) status.textContent = "";
+
+      entries.forEach((e) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${esc(e.entry_date || "")}</td>
+          <td>${esc(formatDateTime(e.created_at))}</td>
+          <td>${esc(e.ref || "")}</td>
+          <td>${esc(e.description || "")}</td>
+          <td>${esc(e.department || "")}</td>
+          <td>${esc(e.payment_method || "")}</td>
+          <td>${esc(e.client_vendor || "")}</td>
+          <td>${esc(e.remarks || "")}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch((err) => {
+      console.error("renderHistory error:", err);
+      if (status) status.textContent = "Failed to load history.";
+    });
+}
+
+// helper: format created_at into readable time
+function formatDateTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleString();
+}
+
+// ==============================
 // Restore session on refresh
 // ==============================
 (async function restoreSession() {
