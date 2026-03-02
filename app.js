@@ -1078,6 +1078,17 @@ async function initAppAfterLogin() {
   applyDateFilter();
 
   const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+
+// If coming back from edit page, open ledger and auto-select account
+if (window.location.hash === "#ledger") {
+  show("ledger");
+
+  const acctFromUrl = getQueryParam("account_id");
+  if (acctFromUrl && $("ledger-account")) {
+    $("ledger-account").value = acctFromUrl;
+    renderLedger();
+  }
+} else {
   show(lastView);
 }
 
@@ -1203,6 +1214,11 @@ function esc(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function getQueryParam(name) {
+  const u = new URL(window.location.href);
+  return u.searchParams.get(name) || "";
 }
 
 // ✅ Live red-border validation for required fields
