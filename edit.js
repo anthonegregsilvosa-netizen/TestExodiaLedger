@@ -355,3 +355,4 @@ async function deleteEntry() {
   $("btn-delete").onclick = deleteEntry;
   $("btn-back").onclick = () => (window.location.href = "./index.html");
 })();
+
