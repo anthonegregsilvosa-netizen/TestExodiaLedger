@@ -7,6 +7,7 @@ const LAST_VIEW_KEY = "exodiaLedger.lastView.v1";
 const FILTER_YEAR_KEY = "exodiaLedger.filterYear.v1";
 const FILTER_MONTH_KEY = "exodiaLedger.filterMonth.v1";
 const LEDGER_ACCOUNT_KEY = "exodiaLedger.ledgerAccount.v1";
+const JOURNAL_VIEW_KEY = "exodiaLedger.journalView.v1";
 
 // ==============================
 // Supabase Setup
@@ -459,6 +460,21 @@ window.applyDateFilter = function () {
   renderCOA();
   renderLedger();
   renderTrialBalance();
+};
+
+// ==============================
+// Journal sub-tabs (Entry / History)
+// ==============================
+window.showJournal = function (which) {
+  localStorage.setItem(JOURNAL_VIEW_KEY, which);
+
+  const entry = $("journal");
+  const hist = $("journal-history");
+
+  if (entry) entry.style.display = (which === "entry") ? "block" : "none";
+  if (hist) hist.style.display = (which === "history") ? "block" : "none";
+
+  if (which === "history") renderHistory();
 };
 
 // ==============================
