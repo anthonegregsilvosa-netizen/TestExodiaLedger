@@ -481,22 +481,39 @@ window.showJournal = function (which) {
 // Tabs
 // ==============================
 window.show = function (view) {
+  // treat "journal-history" as a sub-view inside journal
+  if (view === "journal-history") view = "journal";
+
   localStorage.setItem(LAST_VIEW_KEY, view);
 
-  ["coa", "journal", "ledger", "trial", "journal-history"].forEach((v) => {
+  // Main sections only
+  ["coa", "journal", "ledger", "trial"].forEach((v) => {
     const el = $(v);
     if (!el) return;
     el.style.display = v === view ? "block" : "none";
   });
 
+  // Always hide journal-history unless journal sub-tab says "history"
+  const hist = $("journal-history");
+  if (hist) hist.style.display = "none";
+
+  // Toolbars
+  const coaTb = $("coa-toolbar");
+  if (coaTb) coaTb.style.display = (view === "coa") ? "block" : "none";
+
+  const journalTb = $("journal-toolbar");
+  if (journalTb) journalTb.style.display = (view === "journal") ? "block" : "none";
+
+  // Render main views + journal sub-view
   if (view === "coa") renderCOA();
   if (view === "ledger") renderLedger();
-  if (view === "trial") renderTrialBalance();  
-  if (view === "journal-history") renderHistory();
-  
-  // Show toolbar only on COA tab
-const tb = $("coa-toolbar");
-if (tb) tb.style.display = (view === "coa") ? "block" : "none";
+  if (view === "trial") renderTrialBalance();
+
+  if (view === "journal") {
+    // default: restore last journal sub-tab or show entry
+    const saved = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+    showJournal(saved);
+  }
 };
 
 // ==============================
