@@ -701,15 +701,20 @@ window.saveJournal = async function () {
     totalCredit += c;
 
     lineRows.push({
-      user_id: currentUser.id,
-      journal_id: null,
-      entry_date,
-      ref,
-      account_id: accountId,
-      account_name: accountName,
-      debit: d,
-      credit: c,
-    });
+  user_id: currentUser.id,
+  journal_id: null,
+  entry_date,
+  ref,
+  description,          // ✅ add this
+  department,           // optional
+  payment_method,       // optional
+  client_vendor,        // optional
+  remarks,              // optional
+  account_id: accountId,
+  account_name: accountName,
+  debit: d,
+  credit: c,
+});
   });
 
   if (lineRows.length < 2) return setStatus("Add at least 2 lines.");
