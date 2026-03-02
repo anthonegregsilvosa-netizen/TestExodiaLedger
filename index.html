@@ -191,7 +191,6 @@
     <button onclick="show('journal')">Journal Entry</button>
     <button onclick="show('ledger')">General Ledger</button>
     <button onclick="show('trial')">Trial Balance</button>
-    <button onclick="show('journal-history')">Journal History</button>
   </header>
 
   <!-- ✅ COA OPTIONS BAR (only show on COA tab via JS) -->
@@ -222,6 +221,13 @@
       <option value="12">Dec</option>
     </select>
   </div>
+
+  <!-- ✅ JOURNAL OPTIONS BAR (only show on Journal tab via JS) -->
+<div id="journal-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
+  <b>Journal Options:</b>
+  <button onclick="showJournal('entry')">Journal Entry</button>
+  <button onclick="showJournal('history')">Journal History</button>
+</div>
 
   <!-- ========================= COA ========================= -->
   <section id="coa">
