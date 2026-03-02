@@ -148,6 +148,7 @@ function normalizeLine(row) {
     is_deleted: row.is_deleted ?? false,
     entry_date: row.entry_date,
     ref: row.ref,
+    description: row.description || "",
     accountId: row.account_id,
     accountName: row.account_name || "",
     debit: Number(row.debit || 0),
@@ -905,21 +906,22 @@ function renderLedger() {
     const canEdit = !!l.journal_id;
 
     tr.innerHTML = `
-      <td>${esc(l.entry_date)}</td>
-      <td>${esc(l.ref)}</td>
-      <td style="text-align:right;">${money(l.debit)}</td>
-      <td style="text-align:right;">${money(l.credit)}</td>
-      <td style="text-align:right;">${money(running)}</td>
-      <td>
-        ${
-          canEdit
-            ? `<a href="./edit.html?journal_id=${encodeURIComponent(
-                l.journal_id
-              )}&account_id=${encodeURIComponent(accountId)}">Edit / Delete</a>`
-            : `<span class="muted">N/A</span>`
-        }
-      </td>
-    `;
+  <td>${esc(l.entry_date)}</td>
+  <td>${esc(l.ref)}</td>
+  <td>${esc(l.description || "")}</td>
+  <td style="text-align:right;">${money(l.debit)}</td>
+  <td style="text-align:right;">${money(l.credit)}</td>
+  <td style="text-align:right;">${money(running)}</td>
+  <td>
+    ${
+      canEdit
+        ? `<a href="./edit.html?journal_id=${encodeURIComponent(
+            l.journal_id
+          )}&account_id=${encodeURIComponent(accountId)}">Edit / Delete</a>`
+        : `<span class="muted">N/A</span>`
+    }
+  </td>
+`;
 
     tbody.appendChild(tr);
   });
