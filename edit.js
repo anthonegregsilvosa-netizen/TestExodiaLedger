@@ -298,6 +298,12 @@ async function saveChanges() {
   setStatus("Saved ✅ Changes applied.");
 }
 
+setStatus("Saved ✅ Changes applied.");
+
+setTimeout(() => {
+  window.location.href = returnUrl;
+}, 600);
+
 // ---------- Delete ----------
 async function deleteEntry() {
   const ok = confirm("Delete this journal entry? (It will be hidden, not permanently removed.)");
@@ -337,7 +343,9 @@ async function deleteEntry() {
 (async function boot() {
   journalId = getParam("journal_id");
   const acct = getParam("account_id");
-  returnUrl = acct ? `./index.html#ledger?account_id=${encodeURIComponent(acct)}` : "./index.html";
+  returnUrl = acct
+  ? `./index.html?account_id=${encodeURIComponent(acct)}#ledger`
+  : "./index.html#ledger";
 
   if (!journalId) {
     setStatus("Missing journal_id in URL.", true);
