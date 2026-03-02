@@ -216,17 +216,22 @@ async function saveChanges() {
     const acct = COA.find((a) => a.id === account_id);
     const account_name = acct ? `${acct.code} - ${acct.name}` : "";
 
-    newLines.push({
-      user_id: currentUser.id,
-      journal_id: journalId,
-      entry_date,
-      ref,
-      account_id,
-      account_name,
-      debit: d,
-      credit: c,
-      is_deleted: false,
-    });
+   newLines.push({
+  user_id: currentUser.id,
+  journal_id: journalId,
+  entry_date,
+  ref,
+  description,        // ✅ add this
+  department,         // optional
+  payment_method,     // optional
+  client_vendor,      // optional
+  remarks,            // optional
+  account_id,
+  account_name,
+  debit: d,
+  credit: c,
+  is_deleted: false,
+});
   }
 
   if (newLines.length < 2) {
