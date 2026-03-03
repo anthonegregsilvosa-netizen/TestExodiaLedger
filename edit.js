@@ -124,6 +124,24 @@ async function loadCOA() {
   }
 }
 
+async function initEditPage() {
+  // 1) get session/user first
+  const { data } = await sb.auth.getSession();
+  currentUser = data.session?.user;
+  if (!currentUser) return alert("Please login first.");
+
+  // 2) load COA FIRST
+  COA = await sbFetchCOA();       // same function style as app.js
+  rebuildCoaIndex();              // build COA_BY_ID + COA_BY_CODE
+
+  // 3) now load journal lines for this journal_id
+  const journalId = getQueryParam("journal_id");
+  const lines = await fetchLinesByJournalId(journalId);
+
+  // 4) render lines AFTER COA is ready
+  renderEditLines(lines);
+}
+
 async function loadJournal() {
   const { data: entry, error: e1 } = await sb
     .from("journal_entries")
