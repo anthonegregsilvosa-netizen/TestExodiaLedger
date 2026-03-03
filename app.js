@@ -289,6 +289,50 @@ function resolveLinesAccountIds() {
   }));
 }
 
+function makeAccountSelect() {
+  const sel = document.createElement("select");
+
+  const sorted = [...COA].sort((a, b) => codeNum(a.code) - codeNum(b.code));
+  sorted.forEach((a) => {
+    const opt = document.createElement("option");
+    opt.value = String(a.id); // IMPORTANT: UUID
+    opt.textContent = `${a.code} - ${a.name}`;
+    sel.appendChild(opt);
+  });
+
+  return sel;
+}
+
+function renderEditLines(linesForEdit) {
+  const tbody = document.getElementById("edit-lines-body"); // <-- change to your edit page tbody id
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  linesForEdit.forEach((line) => {
+    const tr = document.createElement("tr");
+
+    const sel = makeAccountSelect();
+    const resolvedId = resolveAccountId(line.account_id, line.account_name);
+
+    // fallback option if account doesn't exist anymore
+    if (![...sel.options].some((o) => o.value === resolvedId)) {
+      const fallback = document.createElement("option");
+      fallback.value = resolvedId || "";
+      fallback.textContent = line.account_name || "(Unknown account)";
+      sel.prepend(fallback);
+    }
+
+    sel.value = resolvedId;
+
+    const tdAcct = document.createElement("td");
+    tdAcct.appendChild(sel);
+    tr.appendChild(tdAcct);
+
+    tbody.appendChild(tr);
+  });
+}
+
 // ==============================
 // Supabase helpers (CHART OF ACCOUNTS)
 // ==============================
@@ -1245,6 +1289,12 @@ function formatDateTime(iso) {
   } else {
     setUI(false);
   }
+
+  const isEditPage = window.location.pathname.endsWith("edit.html");
+if (isEditPage) {
+  // TODO: load COA first, then load lines for this journal_id, then call renderEditLines(lines)
+}
+  
 })();
 
 // ==============================
