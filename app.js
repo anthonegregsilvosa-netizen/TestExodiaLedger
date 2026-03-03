@@ -948,10 +948,10 @@ function renderLedger() {
   });
 
   if (acctLines.length === 0) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="6">No transactions for this account (with current filter).</td>`;
-    tbody.appendChild(tr);
-  }
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td colspan="6">No transactions for this account (with current filter).</td>`;
+  tbody.appendChild(tr);
+}
 }
 
 // ==============================
