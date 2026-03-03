@@ -949,7 +949,11 @@ function renderLedger() {
 
   if (acctLines.length === 0) {
   const tr = document.createElement("tr");
-  tr.innerHTML = `<td colspan="6">No transactions for this account (with current filter).</td>`;
+  tr.innerHTML = `
+    <td colspan="11" style="text-align:center; padding:20px;">
+      No transactions for this account (with current filter).
+    </td>
+  `;
   tbody.appendChild(tr);
 }
 }
