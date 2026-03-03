@@ -435,6 +435,50 @@ function markRequired(el, isBad) {
   el.style.border = isBad ? "2px solid crimson" : "";
 }
 
+window.filterLedgerAccounts = function filterLedgerAccounts() {
+  const sel = $("ledger-account");
+  if (!sel) return;
+
+  const q = ($("ledger-search")?.value || "").trim().toLowerCase();
+
+  // rebuild dropdown every time based on search
+  sel.innerHTML = "";
+
+  const o0 = document.createElement("option");
+  o0.value = "";
+  o0.textContent = q ? "Select from results..." : "Select account...";
+  sel.appendChild(o0);
+
+  const sorted = [...COA].sort((a, b) => {
+    const ca = codeNum(a.code);
+    const cb = codeNum(b.code);
+    if (ca !== cb) return ca - cb;
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+
+  const filtered = q
+    ? sorted.filter((a) => {
+        const text = `${a.code} ${a.name} ${a.type}`.toLowerCase();
+        return text.includes(q);
+      })
+    : sorted;
+
+  filtered.forEach((a) => {
+    const opt = document.createElement("option");
+    opt.value = a.id;
+    opt.textContent = `${a.code} - ${a.name}`;
+    sel.appendChild(opt);
+  });
+
+  // keep previous selection if still visible
+  const saved = localStorage.getItem(LEDGER_ACCOUNT_KEY) || "";
+  if (saved && [...sel.options].some((o) => o.value === saved)) {
+    sel.value = saved;
+  }
+
+  renderLedger();
+};
+
 // ==============================
 // COA datalist (for searchable picker)
 // ==============================
