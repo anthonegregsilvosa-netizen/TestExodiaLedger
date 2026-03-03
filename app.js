@@ -264,9 +264,17 @@ function resolveAccountId(rawAccountId, accountName) {
   const raw = String(rawAccountId || "").trim();
   if (!raw) return "";
 
+  // already an actual COA id
   if (COA_BY_ID[raw]) return raw;
+
+  // if raw is a code (e.g. "1001")
   if (COA_BY_CODE[raw]?.id) return String(COA_BY_CODE[raw].id);
 
+  // if raw looks like "1001 - Cash on Hand"
+  const rawCode = parseCodeFromAccountName(raw);
+  if (rawCode && COA_BY_CODE[rawCode]?.id) return String(COA_BY_CODE[rawCode].id);
+
+  // fallback: try account_name column
   const code = parseCodeFromAccountName(accountName);
   if (code && COA_BY_CODE[code]?.id) return String(COA_BY_CODE[code].id);
 
