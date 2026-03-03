@@ -142,6 +142,7 @@ window.signOut = async function signOut() {
 // Supabase helpers (JOURNAL LINES)
 // ==============================
 function normalizeLine(row) {
+  const h = row.journal_entries || {};
   return {
     id: row.id,
     journal_id: row.journal_id || null,
@@ -149,11 +150,11 @@ function normalizeLine(row) {
     entry_date: row.entry_date,
     ref: row.ref,
 
-    description: row.description || "",
-    department: row.department || "",
-    payment_method: row.payment_method || "",
-    client_vendor: row.client_vendor || "",
-    remarks: row.remarks || "",
+    description: h.description || "",
+    department: h.department || "",
+    payment_method: h.payment_method || "",
+    client_vendor: h.client_vendor || "",
+    remarks: h.remarks || "",
 
     accountId: row.account_id,
     accountName: row.account_name || "",
@@ -197,9 +198,19 @@ async function sbFetchJournalEntries() {
 
 async function sbFetchJournalLines() {
   if (!currentUser) return [];
+
   const { data, error } = await sb
     .from("journal_lines")
-    .select("*")
+    .select(`
+      *,
+      journal_entries:journal_id (
+        description,
+        department,
+        payment_method,
+        client_vendor,
+        remarks
+      )
+    `)
     .eq("user_id", currentUser.id)
     .eq("is_deleted", false)
     .order("created_at", { ascending: true });
@@ -707,22 +718,16 @@ window.saveJournal = async function () {
     totalDebit += d;
     totalCredit += c;
 
-    lineRows.push({
+   lineRows.push({
   user_id: currentUser.id,
   journal_id: null,
   entry_date,
   ref,
-  description,          // ✅ add this
-  department,           // optional
-  payment_method,       // optional
-  client_vendor,        // optional
-  remarks,              // optional
   account_id: accountId,
   account_name: accountName,
   debit: d,
   credit: c,
 });
-  });
 
   if (lineRows.length < 2) return setStatus("Add at least 2 lines.");
   if (Math.abs(totalDebit - totalCredit) > 0.00001) {
