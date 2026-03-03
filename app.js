@@ -148,7 +148,13 @@ function normalizeLine(row) {
     is_deleted: row.is_deleted ?? false,
     entry_date: row.entry_date,
     ref: row.ref,
+
     description: row.description || "",
+    department: row.department || "",
+    payment_method: row.payment_method || "",
+    client_vendor: row.client_vendor || "",
+    remarks: row.remarks || "",
+
     accountId: row.account_id,
     accountName: row.account_name || "",
     debit: Number(row.debit || 0),
