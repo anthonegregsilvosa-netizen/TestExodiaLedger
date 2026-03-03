@@ -728,6 +728,7 @@ window.saveJournal = async function () {
   debit: d,
   credit: c,
 });
+});
 
   if (lineRows.length < 2) return setStatus("Add at least 2 lines.");
   if (Math.abs(totalDebit - totalCredit) > 0.00001) {
