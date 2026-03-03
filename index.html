@@ -318,8 +318,11 @@
   </section>
 
   <!-- ========================= LEDGER ========================= -->
+  
+  <section id="ledger" style="display:none;">
+    <h2>General Ledger</h2>
 
-  <div style="margin: 8px 0;">
+    <div style="margin: 8px 0;">
   <label for="ledger-search"><b>Search account:</b></label>
   <input
     id="ledger-search"
@@ -329,9 +332,6 @@
     oninput="filterLedgerAccounts()"
   />
 </div>
-  
-  <section id="ledger" style="display:none;">
-    <h2>General Ledger</h2>
 
     <select id="ledger-account" onchange="renderLedger()"></select>
 
