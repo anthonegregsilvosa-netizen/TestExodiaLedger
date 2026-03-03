@@ -804,41 +804,32 @@ function renderCOA() {
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
 
-  list.forEach((a) => {
-    const bal = balances[a.id] || 0;
+ list.forEach((a) => {
+  const bal = balances[a.id] || 0;
 
-    const tr = document.createElement("tr");
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${esc(a.code)}</td>
+    <td>${esc(a.name)}</td>
+    <td>${esc(a.type)}</td>
+    <td>${esc(a.normal)}</td>
+    <td style="text-align:right;">${money(bal)}</td>
+    <td style="position:relative; text-align:right;">
+      <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}', event)">⋯</button>
+      <div class="coa-menu" data-coa-menu="${a.id}">
+        <button onclick="editAccountPrompt('${a.id}')">✏️ Edit name</button>
+        <button class="danger" onclick="deleteCOAAccount('${a.id}')">🗑 Delete</button>
+      </div>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
 
-    tr.innerHTML = `
-  <td>${esc(l.entry_date)}</td>
-  <td>${esc(l.ref)}</td>
-  <td>${esc(l.description || "")}</td>
-  <td>${esc(l.department || "")}</td>
-  <td>${esc(l.payment_method || "")}</td>
-  <td>${esc(l.client_vendor || "")}</td>
-  <td>${esc(l.remarks || "")}</td>
-  <td style="text-align:right;">${money(l.debit)}</td>
-  <td style="text-align:right;">${money(l.credit)}</td>
-  <td style="text-align:right;">${money(running)}</td>
-  <td>
-    ${
-      canEdit
-        ? `<a href="./edit.html?journal_id=${encodeURIComponent(
-            l.journal_id
-          )}&account_id=${encodeURIComponent(accountId)}">Edit / Delete</a>`
-        : `<span class="muted">N/A</span>`
-    }
-  </td>
-`;
-
-    tbody.appendChild(tr);
-  });
-
-  if (list.length === 0) {
-    const tr = document.createElement("tr");
-   tr.innerHTML = `<td colspan="11">No transactions for this account (with current filter).</td>`;
-    tbody.appendChild(tr);
-  }
+if (list.length === 0) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td colspan="6">No accounts found for this filter.</td>`;
+  tbody.appendChild(tr);
+}
 }
 
 // ==============================
@@ -917,10 +908,14 @@ function renderLedger() {
     const tr = document.createElement("tr");
     const canEdit = !!l.journal_id;
 
-    tr.innerHTML = `
+   tr.innerHTML = `
   <td>${esc(l.entry_date)}</td>
   <td>${esc(l.ref)}</td>
   <td>${esc(l.description || "")}</td>
+  <td>${esc(l.department || "")}</td>
+  <td>${esc(l.payment_method || "")}</td>
+  <td>${esc(l.client_vendor || "")}</td>
+  <td>${esc(l.remarks || "")}</td>
   <td style="text-align:right;">${money(l.debit)}</td>
   <td style="text-align:right;">${money(l.credit)}</td>
   <td style="text-align:right;">${money(running)}</td>
