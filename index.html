@@ -318,6 +318,18 @@
   </section>
 
   <!-- ========================= LEDGER ========================= -->
+
+  <div style="margin: 8px 0;">
+  <label for="ledger-search"><b>Search account:</b></label>
+  <input
+    id="ledger-search"
+    type="text"
+    placeholder="Type code or name (e.g. 1001, cash, bank)..."
+    style="width: 320px; padding: 6px;"
+    oninput="filterLedgerAccounts()"
+  />
+</div>
+  
   <section id="ledger" style="display:none;">
     <h2>General Ledger</h2>
 
