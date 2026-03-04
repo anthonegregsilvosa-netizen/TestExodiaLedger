@@ -6,24 +6,22 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlem93a3BycXRhd3F6cXhqdHpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzY5MDYsImV4cCI6MjA4NzY1MjkwNn0.OJuLSgh4_zTXpl5OWaEK9HdoFfnPF-TTx2rZCZN5rlQ";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const $ = (id) => document.getElementById(id);
 
-let currentUser = null;
-let COA = [];
-let journalId = "";
-let returnUrl = "./index.html#ledger";
+// ==============================
+// Helpers
+// ==============================
+function getQueryParam(name) {
+  const u = new URL(window.location.href);
+  return u.searchParams.get(name) || "";
+}
 
-// ---------- UI helpers ----------
 function setStatus(msg, isErr = false) {
   const el = $("status");
   if (!el) return;
   el.textContent = msg || "";
   el.style.color = isErr ? "crimson" : "";
-}
-
-function markRequired(el, bad) {
-  if (!el) return;
-  el.style.border = bad ? "2px solid crimson" : "";
 }
 
 function parseMoney(v) {
@@ -32,339 +30,274 @@ function parseMoney(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
-// ---------- URL ----------
-function getParam(name) {
-  const u = new URL(window.location.href);
-  return u.searchParams.get(name) || "";
+function codeNum(code) {
+  const n = Number(String(code || "").replace(/[^0-9]/g, ""));
+  return Number.isFinite(n) ? n : 999999999;
 }
 
-// ---------- Lines UI ----------
-function addLineRow(account_id = "", debit = 0, credit = 0) {
-  const tbody = $("e-lines");
-  if (!tbody) return;
+// ==============================
+// COA index + resolver
+// ==============================
+let COA = [];
+let COA_BY_ID = {};
+let COA_BY_CODE = {};
 
-  const tr = document.createElement("tr");
+function rebuildCoaIndex() {
+  COA_BY_ID = {};
+  COA_BY_CODE = {};
+  (COA || []).forEach((a) => {
+    const id = String(a.id || "").trim();
+    const code = String(a.code || "").trim();
+    if (id) COA_BY_ID[id] = a;
+    if (code) COA_BY_CODE[code] = a;
+  });
+}
 
+function parseCodeFromAccountName(accountName) {
+  const t = String(accountName || "").trim();
+  if (!t.includes(" - ")) return "";
+  return String(t.split(" - ")[0] || "").trim();
+}
+
+// FIX: old rows may store account_id as CODE (1004) or UUID.
+// This makes sure we always get the UUID that matches COA.
+function resolveAccountId(rawAccountId, accountName) {
+  const raw = String(rawAccountId || "").trim();
+  if (!raw) return "";
+
+  // already UUID
+  if (COA_BY_ID[raw]) return raw;
+
+  // if it is code like "1004"
+  if (COA_BY_CODE[raw]?.id) return String(COA_BY_CODE[raw].id);
+
+  // try parse from "1004 - Bank..."
+  const code = parseCodeFromAccountName(accountName);
+  if (code && COA_BY_CODE[code]?.id) return String(COA_BY_CODE[code].id);
+
+  return raw;
+}
+
+// ==============================
+// Fetch COA for edit page
+// ==============================
+async function sbFetchCOA(userId) {
+  const { data, error } = await sb
+    .from("coa_accounts")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_deleted", false)
+    .order("code", { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+// ==============================
+// Build account <select>
+// ==============================
+function buildAccountSelect(selectedIdOrCode, fallbackName = "") {
   const sel = document.createElement("select");
-  const opt0 = document.createElement("option");
-  opt0.value = "";
-  opt0.textContent = "Select account...";
-  sel.appendChild(opt0);
 
   const sorted = [...COA].sort((a, b) => {
-    const ca = Number(String(a.code || "").replace(/[^0-9]/g, "")) || 999999999;
-    const cb = Number(String(b.code || "").replace(/[^0-9]/g, "")) || 999999999;
+    const ca = codeNum(a.code);
+    const cb = codeNum(b.code);
     if (ca !== cb) return ca - cb;
     return String(a.name || "").localeCompare(String(b.name || ""));
   });
 
   sorted.forEach((a) => {
     const opt = document.createElement("option");
-    opt.value = a.id;
+    opt.value = String(a.id); // UUID
     opt.textContent = `${a.code} - ${a.name}`;
     sel.appendChild(opt);
   });
 
-  sel.value = account_id || "";
+  // resolve and set selected
+  const resolved = resolveAccountId(selectedIdOrCode, fallbackName);
 
+  // if resolved not found in COA, add a fallback option (so it doesn't look blank)
+  if (resolved && ![...sel.options].some((o) => o.value === resolved)) {
+    const opt = document.createElement("option");
+    opt.value = resolved;
+    opt.textContent = fallbackName || "(Unknown account)";
+    sel.prepend(opt);
+  }
+
+  sel.value = resolved || (sel.options[0]?.value ?? "");
+  return sel;
+}
+
+// ==============================
+// Load entry + lines (by journal_id)
+// ==============================
+async function fetchEntry(journalId) {
+  const { data, error } = await sb
+    .from("journal_entries")
+    .select("*")
+    .eq("id", journalId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+async function fetchLines(journalId) {
+  const { data, error } = await sb
+    .from("journal_lines")
+    .select("*")
+    .eq("journal_id", journalId)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+// ==============================
+// Render lines in edit page
+// ==============================
+function renderLines(lines) {
+  const tbody = $("e-lines");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  lines.forEach((l) => {
+    const tr = document.createElement("tr");
+
+    // account select
+    const tdAcct = document.createElement("td");
+    const sel = buildAccountSelect(l.account_id, l.account_name);
+    tdAcct.appendChild(sel);
+
+    // debit
+    const tdD = document.createElement("td");
+    tdD.className = "right";
+    const inD = document.createElement("input");
+    inD.type = "text";
+    inD.value = Number(l.debit || 0).toFixed(2);
+    tdD.appendChild(inD);
+
+    // credit
+    const tdC = document.createElement("td");
+    tdC.className = "right";
+    const inC = document.createElement("input");
+    inC.type = "text";
+    inC.value = Number(l.credit || 0).toFixed(2);
+    tdC.appendChild(inC);
+
+    // delete line button (soft delete on save, or remove row locally)
+    const tdX = document.createElement("td");
+    const btnX = document.createElement("button");
+    btnX.textContent = "X";
+    btnX.onclick = () => tr.remove();
+    tdX.appendChild(btnX);
+
+    // store line id so we can update later
+    tr.dataset.lineId = l.id;
+
+    tr.appendChild(tdAcct);
+    tr.appendChild(tdD);
+    tr.appendChild(tdC);
+    tr.appendChild(tdX);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ==============================
+// Add new empty line
+// ==============================
+function addEmptyLine() {
+  const tbody = $("e-lines");
+  if (!tbody) return;
+
+  const tr = document.createElement("tr");
+
+  const tdAcct = document.createElement("td");
+  const sel = buildAccountSelect("");
+  tdAcct.appendChild(sel);
+
+  const tdD = document.createElement("td");
+  tdD.className = "right";
   const inD = document.createElement("input");
-  inD.placeholder = "0.00";
-  inD.value = debit ? String(debit) : "";
+  inD.type = "text";
+  inD.value = "0.00";
+  tdD.appendChild(inD);
 
+  const tdC = document.createElement("td");
+  tdC.className = "right";
   const inC = document.createElement("input");
-  inC.placeholder = "0.00";
-  inC.value = credit ? String(credit) : "";
+  inC.type = "text";
+  inC.value = "0.00";
+  tdC.appendChild(inC);
 
-  const del = document.createElement("button");
-  del.textContent = "X";
-  del.onclick = () => tr.remove();
+  const tdX = document.createElement("td");
+  const btnX = document.createElement("button");
+  btnX.textContent = "X";
+  btnX.onclick = () => tr.remove();
+  tdX.appendChild(btnX);
 
-  const td1 = document.createElement("td");
-  td1.appendChild(sel);
-
-  const td2 = document.createElement("td");
-  td2.className = "right";
-  td2.appendChild(inD);
-
-  const td3 = document.createElement("td");
-  td3.className = "right";
-  td3.appendChild(inC);
-
-  const td4 = document.createElement("td");
-  td4.className = "right";
-  td4.appendChild(del);
-
-  tr.appendChild(td1);
-  tr.appendChild(td2);
-  tr.appendChild(td3);
-  tr.appendChild(td4);
+  tr.appendChild(tdAcct);
+  tr.appendChild(tdD);
+  tr.appendChild(tdC);
+  tr.appendChild(tdX);
 
   tbody.appendChild(tr);
 }
 
-// ---------- Load data ----------
-async function requireLogin() {
-  const { data } = await sb.auth.getSession();
-  currentUser = data.session?.user || null;
-
-  if (!currentUser) {
-    window.location.href = "./index.html";
-    return false;
-  }
-  return true;
-}
-
-async function loadCOA() {
-  // Prefer DB COA if you want, but JSON is ok for account_name display
+// ==============================
+// Init Edit Page
+// ==============================
+(async function initEditPage() {
   try {
-    COA = await fetch("./data/coa.json").then((r) => r.json());
-    if (!Array.isArray(COA)) COA = [];
-  } catch {
-    COA = [];
+    setStatus("Loading...");
+
+    const { data } = await sb.auth.getSession();
+    const session = data.session;
+    if (!session?.user) {
+      setStatus("Not logged in. Please login first.", true);
+      return;
+    }
+
+    const user = session.user;
+
+    const journalId = getQueryParam("journal_id");
+    if (!journalId) {
+      setStatus("Missing journal_id in URL.", true);
+      return;
+    }
+
+    // 1) Load COA first
+    COA = await sbFetchCOA(user.id);
+    rebuildCoaIndex();
+
+    // 2) Load entry header
+    const entry = await fetchEntry(journalId);
+    $("e-date").value = entry.entry_date || "";
+    $("e-ref").value = entry.ref || "";
+    $("e-desc").value = entry.description || "";
+    $("e-dept").value = entry.department || "";
+    $("e-pay").value = entry.payment_method || "";
+    $("e-client").value = entry.client_vendor || "";
+    $("e-remarks").value = entry.remarks || "";
+
+    // 3) Load lines and render
+    const lines = await fetchLines(journalId);
+    renderLines(lines);
+
+    // Buttons
+    $("btn-add").onclick = addEmptyLine;
+
+    // Back button (keeps account_id in URL if present)
+    $("btn-back").onclick = () => {
+      const acctId = getQueryParam("account_id") || "";
+      window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
+    };
+
+    setStatus("Loaded ✅");
+  } catch (e) {
+    console.error(e);
+    setStatus("Failed to load edit page. Check console.", true);
   }
-}
-
-async function initEditPage() {
-  // 1) get session/user first
-  const { data } = await sb.auth.getSession();
-  currentUser = data.session?.user;
-  if (!currentUser) return alert("Please login first.");
-
-  // 2) load COA FIRST
-  COA = await sbFetchCOA();       // same function style as app.js
-  rebuildCoaIndex();              // build COA_BY_ID + COA_BY_CODE
-
-  // 3) now load journal lines for this journal_id
-  const journalId = getQueryParam("journal_id");
-  const lines = await fetchLinesByJournalId(journalId);
-
-  // 4) render lines AFTER COA is ready
-  renderEditLines(lines);
-}
-
-async function loadJournal() {
-  const { data: entry, error: e1 } = await sb
-    .from("journal_entries")
-    .select("*")
-    .eq("id", journalId)
-    .eq("user_id", currentUser.id)
-    .maybeSingle();
-
-  if (e1) {
-    console.error(e1);
-    setStatus("Failed loading journal entry.", true);
-    return;
-  }
-
-  if (!entry || entry.is_deleted) {
-    setStatus("This entry does not exist (or already deleted).", true);
-    return;
-  }
-
-  $("e-date").value = entry.entry_date || "";
-  $("e-ref").value = entry.ref || "";
-  $("e-desc").value = entry.description || "";
-  $("e-dept").value = entry.department || "";
-  $("e-pay").value = entry.payment_method || "";
-  $("e-client").value = entry.client_vendor || "";
-  $("e-remarks").value = entry.remarks || "";
-
-  const { data: lines, error: e2 } = await sb
-    .from("journal_lines")
-    .select("*")
-    .eq("journal_id", journalId)
-    .eq("user_id", currentUser.id)
-    .eq("is_deleted", false)
-    .order("created_at", { ascending: true });
-
-  if (e2) {
-    console.error(e2);
-    setStatus("Failed loading journal lines.", true);
-    return;
-  }
-
-  $("e-lines").innerHTML = "";
-  (lines || []).forEach((l) => addLineRow(l.account_id, l.debit, l.credit));
-
-  if ((lines || []).length < 2) {
-    addLineRow();
-    addLineRow();
-  }
-}
-
-// ---------- Save ----------
-async function saveChanges() {
-  const entry_date = $("e-date")?.value || "";
-  const ref = ($("e-ref")?.value || "").trim();
-  const description = ($("e-desc")?.value || "").trim();
-
-  markRequired($("e-date"), !entry_date);
-  markRequired($("e-ref"), !ref);
-  markRequired($("e-desc"), !description);
-
-  if (!entry_date || !ref || !description) {
-    setStatus("Please fill all required (*) fields.", true);
-    return;
-  }
-
-  const department = ($("e-dept")?.value || "").trim();
-  const payment_method = ($("e-pay")?.value || "").trim();
-  const client_vendor = ($("e-client")?.value || "").trim();
-  const remarks = ($("e-remarks")?.value || "").trim();
-
-  const rows = [...$("e-lines").querySelectorAll("tr")];
-  const newLines = [];
-  let totalD = 0;
-  let totalC = 0;
-
-  for (const r of rows) {
-    const sel = r.querySelector("select");
-    const inputs = r.querySelectorAll("input");
-
-    const account_id = sel?.value || "";
-    const d = parseMoney(inputs[0]?.value);
-    const c = parseMoney(inputs[1]?.value);
-
-    if (!account_id) continue;
-    if (!d && !c) continue;
-
-    totalD += d;
-    totalC += c;
-
-    const acct = COA.find((a) => a.id === account_id);
-    const account_name = acct ? `${acct.code} - ${acct.name}` : "";
-
-newLines.push({
-  user_id: currentUser.id,
-  journal_id: journalId,
-  entry_date,
-  ref,
-
-  description,
-  department,
-  payment_method,
-  client_vendor,
-  remarks,
-
-  account_id,
-  account_name,
-  debit: d,
-  credit: c,
-  is_deleted: false,
-});
-  }
-
-  if (newLines.length < 2) {
-    setStatus("Add at least 2 lines.", true);
-    return;
-  }
-
-  if (Math.abs(totalD - totalC) > 0.00001) {
-    setStatus("Match the debit and credit.", true);
-    return;
-  }
-
-  const { error: e1 } = await sb
-    .from("journal_entries")
-    .update({
-      entry_date,
-      ref,
-      description,
-      department,
-      payment_method,
-      client_vendor,
-      remarks,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", journalId)
-    .eq("user_id", currentUser.id);
-
-  if (e1) {
-    console.error(e1);
-    setStatus("Save failed (header). Check policies/unique ref rules.", true);
-    return;
-  }
-
-  const { error: e2 } = await sb
-    .from("journal_lines")
-    .update({ is_deleted: true })
-    .eq("journal_id", journalId)
-    .eq("user_id", currentUser.id);
-
-  if (e2) {
-    console.error(e2);
-    setStatus("Save failed (lines delete). Check UPDATE policy.", true);
-    return;
-  }
-
-  const { error: e3 } = await sb.from("journal_lines").insert(newLines);
-
-  if (e3) {
-    console.error(e3);
-    setStatus("Save failed (lines insert). Check INSERT policy.", true);
-    return;
-  }
-
-  setStatus("Saved ✅ Returning to ledger...");
-  setTimeout(() => (window.location.href = returnUrl), 600);
-}
-
-// ---------- Delete ----------
-async function deleteEntry() {
-  const ok = confirm("Delete this journal entry? (It will be hidden, not permanently removed.)");
-  if (!ok) return;
-
-  const { error: e1 } = await sb
-    .from("journal_entries")
-    .update({ is_deleted: true, updated_at: new Date().toISOString() })
-    .eq("id", journalId)
-    .eq("user_id", currentUser.id);
-
-  if (e1) {
-    console.error(e1);
-    setStatus("Delete failed (entry). Check UPDATE policy.", true);
-    return;
-  }
-
-  const { error: e2 } = await sb
-    .from("journal_lines")
-    .update({ is_deleted: true })
-    .eq("journal_id", journalId)
-    .eq("user_id", currentUser.id);
-
-  if (e2) {
-    console.error(e2);
-    setStatus("Delete failed (lines). Check UPDATE policy.", true);
-    return;
-  }
-
-  setStatus("Deleted ✅ Returning to ledger...");
-  setTimeout(() => (window.location.href = returnUrl), 600);
-}
-
-// ---------- Boot ----------
-(async function boot() {
-  journalId = getParam("journal_id");
-  const acct = getParam("account_id");
-
-  // ✅ correct format: query first, hash last
-  returnUrl = acct
-    ? `./index.html?account_id=${encodeURIComponent(acct)}#ledger`
-    : "./index.html#ledger";
-
-  if (!journalId) {
-    setStatus("Missing journal_id in URL.", true);
-    return;
-  }
-
-  const ok = await requireLogin();
-  if (!ok) return;
-
-  await loadCOA();
-  await loadJournal();
-
-  $("btn-add").onclick = () => addLineRow();
-  $("btn-save").onclick = saveChanges;
-  $("btn-delete").onclick = deleteEntry;
-  $("btn-back").onclick = () => (window.location.href = returnUrl);
 })();
