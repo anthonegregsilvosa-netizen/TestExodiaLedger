@@ -328,7 +328,15 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
-  setStatus("Saved ✅");
+ setStatus("Saved ✅");
+
+// ✅ go back to ledger after save
+const acctId = getQueryParam("account_id") || "";
+const url = new URL("./index.html", window.location.href);
+url.searchParams.set("account_id", acctId);
+url.hash = "ledger";
+window.location.replace(url.toString());
+return;
 
   const lines = await fetchLines(journalId, userId);
   renderLines(lines);
