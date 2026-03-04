@@ -348,6 +348,16 @@ async function deleteEntry(journalId, userId) {
 
   setStatus("Deleting...");
 
+  setStatus("Deleted ✅");
+
+// ✅ go back to ledger after delete
+const acctId = getQueryParam("account_id") || "";
+const url = new URL("./index.html", window.location.href);
+url.searchParams.set("account_id", acctId);
+url.hash = "ledger";
+window.location.replace(url.toString());
+return;
+
   const { error: e1 } = await sb
     .from("journal_entries")
     .update({ is_deleted: true, updated_at: new Date().toISOString() })
