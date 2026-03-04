@@ -247,6 +247,175 @@ function addEmptyLine() {
 }
 
 // ==============================
+// SAVE + DELETE (Edit page)
+// ==============================
+
+// Collect UI lines from the table
+function collectLinesFromUI() {
+  const tbody = $("e-lines");
+  const rows = [...(tbody?.querySelectorAll("tr") || [])];
+
+  const items = rows.map((tr) => {
+    const sel = tr.querySelector("select");
+    const inputs = tr.querySelectorAll("input");
+
+    const debit = parseMoney(inputs?.[0]?.value);
+    const credit = parseMoney(inputs?.[1]?.value);
+
+    return {
+      lineId: tr.dataset.lineId || null,
+      account_uuid: sel?.value || "",
+      debit,
+      credit,
+    };
+  });
+
+  // remove empty rows
+  return items.filter((x) => x.account_uuid && (x.debit !== 0 || x.credit !== 0));
+}
+
+function isBalanced(lines) {
+  let d = 0, c = 0;
+  lines.forEach((l) => { d += l.debit; c += l.credit; });
+  return Math.abs(d - c) < 0.00001;
+}
+
+// Save: update header + replace all lines
+async function saveChanges(journalId, userId) {
+  const entry_date = $("e-date")?.value || "";
+  const ref = ($("e-ref")?.value || "").trim();
+  const description = ($("e-desc")?.value || "").trim();
+  const department = ($("e-dept")?.value || "").trim();
+  const payment_method = ($("e-pay")?.value || "").trim();
+  const client_vendor = ($("e-client")?.value || "").trim();
+  const remarks = ($("e-remarks")?.value || "").trim();
+
+  if (!entry_date || !ref || !description) {
+    setStatus("Fill Date, Ref No, and Description first.", true);
+    return;
+  }
+
+  const uiLines = collectLinesFromUI();
+  if (uiLines.length < 2) {
+    setStatus("Add at least 2 lines.", true);
+    return;
+  }
+
+  if (!isBalanced(uiLines)) {
+    setStatus("Not balanced ❌ Debit must equal Credit.", true);
+    return;
+  }
+
+  setStatus("Saving...");
+
+  // 1) Update journal header
+  const { error: headErr } = await sb
+    .from("journal_entries")
+    .update({
+      entry_date,
+      ref,
+      description,
+      department,
+      payment_method,
+      client_vendor,
+      remarks,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", journalId)
+    .eq("user_id", userId);
+
+  if (headErr) {
+    console.error(headErr);
+    setStatus("Failed to update entry header. Check RLS/policies.", true);
+    return;
+  }
+
+  // 2) Soft-delete all existing lines for this journal (simplest + reliable)
+  const { error: delLinesErr } = await sb
+    .from("journal_lines")
+    .update({ is_deleted: true })
+    .eq("journal_id", journalId)
+    .eq("user_id", userId);
+
+  if (delLinesErr) {
+    console.error(delLinesErr);
+    setStatus("Failed to update lines (soft delete).", true);
+    return;
+  }
+
+  // 3) Insert fresh lines from UI
+  const fresh = uiLines.map((l) => {
+    const acct = COA_BY_ID[l.account_uuid];
+    const account_name = acct ? `${acct.code} - ${acct.name}` : "";
+
+    return {
+      user_id: userId,
+      journal_id: journalId,
+      entry_date,
+      ref,
+      account_id: l.account_uuid,     // ✅ always UUID now
+      account_name,
+      debit: l.debit,
+      credit: l.credit,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+  });
+
+  const { error: insErr } = await sb.from("journal_lines").insert(fresh);
+
+  if (insErr) {
+    console.error(insErr);
+    setStatus("Failed to insert updated lines.", true);
+    return;
+  }
+
+  setStatus("Saved ✅");
+
+  // Reload lines so the table stores real IDs again
+  const lines = await fetchLines(journalId);
+  renderLines(lines);
+}
+
+// Delete: soft delete entry + lines
+async function deleteEntry(journalId, userId) {
+  const ok = confirm("Delete this journal entry?\n\n(This is soft delete.)");
+  if (!ok) return;
+
+  setStatus("Deleting...");
+
+  const { error: e1 } = await sb
+    .from("journal_entries")
+    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .eq("id", journalId)
+    .eq("user_id", userId);
+
+  if (e1) {
+    console.error(e1);
+    setStatus("Failed to delete journal entry.", true);
+    return;
+  }
+
+  const { error: e2 } = await sb
+    .from("journal_lines")
+    .update({ is_deleted: true })
+    .eq("journal_id", journalId)
+    .eq("user_id", userId);
+
+  if (e2) {
+    console.error(e2);
+    setStatus("Entry deleted, but failed to delete lines.", true);
+    return;
+  }
+
+  setStatus("Deleted ✅");
+
+  // Go back to ledger
+  const acctId = getQueryParam("account_id") || "";
+  window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
+}
+
+// ==============================
 // Init Edit Page
 // ==============================
 (async function initEditPage() {
@@ -287,7 +456,9 @@ function addEmptyLine() {
     renderLines(lines);
 
     // Buttons
-    $("btn-add").onclick = addEmptyLine;
+   $("btn-add").onclick = addEmptyLine;
+$("btn-save").onclick = () => saveChanges(journalId, user.id);
+$("btn-delete").onclick = () => deleteEntry(journalId, user.id);
 
     // Back button (keeps account_id in URL if present)
     $("btn-back").onclick = () => {
