@@ -1,21 +1,17 @@
 // ==============================
-// Supabase Setup (same as app.js)
+// EDIT.JS (FULL WORKING)
 // ==============================
+
+// --- MUST MATCH YOUR app.js ---
 const SUPABASE_URL = "https://pezowkprqtawqzqxjtzb.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlem93a3BycXRhd3F6cXhqdHpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwNzY5MDYsImV4cCI6MjA4NzY1MjkwNn0.OJuLSgh4_zTXpl5OWaEK9HdoFfnPF-TTx2rZCZN5rlQ";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const $ = (id) => document.getElementById(id);
+console.log("✅ edit.js loaded"); // you should see this in console
 
-// ==============================
-// Helpers
-// ==============================
-function getQueryParam(name) {
-  const u = new URL(window.location.href);
-  return u.searchParams.get(name) || "";
-}
+const $ = (id) => document.getElementById(id);
 
 function setStatus(msg, isErr = false) {
   const el = $("status");
@@ -24,19 +20,26 @@ function setStatus(msg, isErr = false) {
   el.style.color = isErr ? "crimson" : "";
 }
 
+function getQueryParam(name) {
+  const u = new URL(window.location.href);
+  return u.searchParams.get(name) || "";
+}
+
 function parseMoney(v) {
   const cleaned = String(v || "").replace(/[^0-9.-]/g, "");
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : 0;
 }
 
-function codeNum(code) {
-  const n = Number(String(code || "").replace(/[^0-9]/g, ""));
-  return Number.isFinite(n) ? n : 999999999;
+function money(n) {
+  return (Number(n) || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 // ==============================
-// COA index + resolver
+// COA loading + resolver
 // ==============================
 let COA = [];
 let COA_BY_ID = {};
@@ -53,35 +56,30 @@ function rebuildCoaIndex() {
   });
 }
 
-function parseCodeFromAccountName(accountName) {
-  const t = String(accountName || "").trim();
-  if (!t.includes(" - ")) return "";
-  return String(t.split(" - ")[0] || "").trim();
-}
-
-// FIX: old rows may store account_id as CODE (1004) or UUID.
-// This makes sure we always get the UUID that matches COA.
+// Old records might store account_id as code (like "1004").
+// New records store account_id as uuid.
+// This converts to uuid if possible.
 function resolveAccountId(rawAccountId, accountName) {
   const raw = String(rawAccountId || "").trim();
   if (!raw) return "";
 
-  // already UUID
+  // already a uuid id in COA
   if (COA_BY_ID[raw]) return raw;
 
-  // if it is code like "1004"
+  // maybe code
   if (COA_BY_CODE[raw]?.id) return String(COA_BY_CODE[raw].id);
 
-  // try parse from "1004 - Bank..."
-  const code = parseCodeFromAccountName(accountName);
-  if (code && COA_BY_CODE[code]?.id) return String(COA_BY_CODE[code].id);
+  // maybe in account_name "1004 - Bank..."
+  const t = String(accountName || "");
+  if (t.includes(" - ")) {
+    const code = t.split(" - ")[0].trim();
+    if (COA_BY_CODE[code]?.id) return String(COA_BY_CODE[code].id);
+  }
 
   return raw;
 }
 
-// ==============================
-// Fetch COA for edit page
-// ==============================
-async function sbFetchCOA(userId) {
+async function loadCOA(userId) {
   const { data, error } = await sb
     .from("coa_accounts")
     .select("*")
@@ -90,63 +88,39 @@ async function sbFetchCOA(userId) {
     .order("code", { ascending: true });
 
   if (error) throw error;
-  return data || [];
+
+  COA = (data || []).map((r) => ({
+    id: r.id,
+    code: r.code || "",
+    name: r.name || "",
+    type: r.type || "",
+    normal: r.normal || "",
+  }));
+
+  rebuildCoaIndex();
 }
 
 // ==============================
-// Build account <select>
+// Fetch entry + lines
 // ==============================
-function buildAccountSelect(selectedIdOrCode, fallbackName = "") {
-  const sel = document.createElement("select");
-
-  const sorted = [...COA].sort((a, b) => {
-    const ca = codeNum(a.code);
-    const cb = codeNum(b.code);
-    if (ca !== cb) return ca - cb;
-    return String(a.name || "").localeCompare(String(b.name || ""));
-  });
-
-  sorted.forEach((a) => {
-    const opt = document.createElement("option");
-    opt.value = String(a.id); // UUID
-    opt.textContent = `${a.code} - ${a.name}`;
-    sel.appendChild(opt);
-  });
-
-  // resolve and set selected
-  const resolved = resolveAccountId(selectedIdOrCode, fallbackName);
-
-  // if resolved not found in COA, add a fallback option (so it doesn't look blank)
-  if (resolved && ![...sel.options].some((o) => o.value === resolved)) {
-    const opt = document.createElement("option");
-    opt.value = resolved;
-    opt.textContent = fallbackName || "(Unknown account)";
-    sel.prepend(opt);
-  }
-
-  sel.value = resolved || (sel.options[0]?.value ?? "");
-  return sel;
-}
-
-// ==============================
-// Load entry + lines (by journal_id)
-// ==============================
-async function fetchEntry(journalId) {
+async function fetchEntry(journalId, userId) {
   const { data, error } = await sb
     .from("journal_entries")
     .select("*")
     .eq("id", journalId)
+    .eq("user_id", userId)
     .single();
 
   if (error) throw error;
   return data;
 }
 
-async function fetchLines(journalId) {
+async function fetchLines(journalId, userId) {
   const { data, error } = await sb
     .from("journal_lines")
     .select("*")
     .eq("journal_id", journalId)
+    .eq("user_id", userId)
     .eq("is_deleted", false)
     .order("created_at", { ascending: true });
 
@@ -155,90 +129,67 @@ async function fetchLines(journalId) {
 }
 
 // ==============================
-// Render lines in edit page
+// Render lines table
 // ==============================
-function renderLines(lines) {
-  const tbody = $("e-lines");
-  if (!tbody) return;
-  tbody.innerHTML = "";
+function buildAccountSelect(selectedId) {
+  const sel = document.createElement("select");
 
-  lines.forEach((l) => {
-    const tr = document.createElement("tr");
+  const opt0 = document.createElement("option");
+  opt0.value = "";
+  opt0.textContent = "Select account...";
+  sel.appendChild(opt0);
 
-    // account select
-    const tdAcct = document.createElement("td");
-    const sel = buildAccountSelect(l.account_id, l.account_name);
-    tdAcct.appendChild(sel);
-
-    // debit
-    const tdD = document.createElement("td");
-    tdD.className = "right";
-    const inD = document.createElement("input");
-    inD.type = "text";
-    inD.value = Number(l.debit || 0).toFixed(2);
-    tdD.appendChild(inD);
-
-    // credit
-    const tdC = document.createElement("td");
-    tdC.className = "right";
-    const inC = document.createElement("input");
-    inC.type = "text";
-    inC.value = Number(l.credit || 0).toFixed(2);
-    tdC.appendChild(inC);
-
-    // delete line button (soft delete on save, or remove row locally)
-    const tdX = document.createElement("td");
-    const btnX = document.createElement("button");
-    btnX.textContent = "X";
-    btnX.onclick = () => tr.remove();
-    tdX.appendChild(btnX);
-
-    // store line id so we can update later
-    tr.dataset.lineId = l.id;
-
-    tr.appendChild(tdAcct);
-    tr.appendChild(tdD);
-    tr.appendChild(tdC);
-    tr.appendChild(tdX);
-
-    tbody.appendChild(tr);
+  COA.forEach((a) => {
+    const opt = document.createElement("option");
+    opt.value = a.id; // ✅ uuid
+    opt.textContent = `${a.code} - ${a.name}`;
+    sel.appendChild(opt);
   });
+
+  if (selectedId) sel.value = selectedId;
+  return sel;
 }
 
-// ==============================
-// Add new empty line
-// ==============================
-function addEmptyLine() {
+function addEmptyLine(prefill = null) {
   const tbody = $("e-lines");
   if (!tbody) return;
 
   const tr = document.createElement("tr");
 
-  const tdAcct = document.createElement("td");
-  const sel = buildAccountSelect("");
-  tdAcct.appendChild(sel);
+  // account
+  const tdA = document.createElement("td");
 
+  const resolved = prefill
+    ? resolveAccountId(prefill.account_id, prefill.account_name)
+    : "";
+
+  const sel = buildAccountSelect(resolved);
+  tdA.appendChild(sel);
+
+  // debit
   const tdD = document.createElement("td");
   tdD.className = "right";
-  const inD = document.createElement("input");
-  inD.type = "text";
-  inD.value = "0.00";
-  tdD.appendChild(inD);
+  const iD = document.createElement("input");
+  iD.type = "text";
+  iD.value = prefill ? money(prefill.debit) : "0.00";
+  tdD.appendChild(iD);
 
+  // credit
   const tdC = document.createElement("td");
   tdC.className = "right";
-  const inC = document.createElement("input");
-  inC.type = "text";
-  inC.value = "0.00";
-  tdC.appendChild(inC);
+  const iC = document.createElement("input");
+  iC.type = "text";
+  iC.value = prefill ? money(prefill.credit) : "0.00";
+  tdC.appendChild(iC);
 
+  // delete row button
   const tdX = document.createElement("td");
-  const btnX = document.createElement("button");
-  btnX.textContent = "X";
-  btnX.onclick = () => tr.remove();
-  tdX.appendChild(btnX);
+  const bx = document.createElement("button");
+  bx.textContent = "X";
+  bx.onclick = () => tr.remove();
+  tdX.appendChild(bx);
 
-  tr.appendChild(tdAcct);
+  tr.appendChild(tdA);
   tr.appendChild(tdD);
   tr.appendChild(tdC);
   tr.appendChild(tdX);
@@ -246,41 +197,48 @@ function addEmptyLine() {
   tbody.appendChild(tr);
 }
 
-// ==============================
-// SAVE + DELETE (Edit page)
-// ==============================
+function renderLines(lines) {
+  const tbody = $("e-lines");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  (lines || []).forEach((l) => addEmptyLine(l));
+  if ((lines || []).length === 0) {
+    addEmptyLine();
+    addEmptyLine();
+  }
+}
 
-// Collect UI lines from the table
 function collectLinesFromUI() {
   const tbody = $("e-lines");
   const rows = [...(tbody?.querySelectorAll("tr") || [])];
 
-  const items = rows.map((tr) => {
-    const sel = tr.querySelector("select");
-    const inputs = tr.querySelectorAll("input");
+  const out = rows
+    .map((tr) => {
+      const sel = tr.querySelector("select");
+      const inputs = tr.querySelectorAll("input");
+      const account_uuid = sel?.value || "";
+      const debit = parseMoney(inputs?.[0]?.value);
+      const credit = parseMoney(inputs?.[1]?.value);
+      return { account_uuid, debit, credit };
+    })
+    .filter((x) => x.account_uuid && (x.debit !== 0 || x.credit !== 0));
 
-    const debit = parseMoney(inputs?.[0]?.value);
-    const credit = parseMoney(inputs?.[1]?.value);
-
-    return {
-      lineId: tr.dataset.lineId || null,
-      account_uuid: sel?.value || "",
-      debit,
-      credit,
-    };
-  });
-
-  // remove empty rows
-  return items.filter((x) => x.account_uuid && (x.debit !== 0 || x.credit !== 0));
+  return out;
 }
 
 function isBalanced(lines) {
-  let d = 0, c = 0;
-  lines.forEach((l) => { d += l.debit; c += l.credit; });
+  let d = 0,
+    c = 0;
+  lines.forEach((l) => {
+    d += l.debit;
+    c += l.credit;
+  });
   return Math.abs(d - c) < 0.00001;
 }
 
-// Save: update header + replace all lines
+// ==============================
+// SAVE + DELETE
+// ==============================
 async function saveChanges(journalId, userId) {
   const entry_date = $("e-date")?.value || "";
   const ref = ($("e-ref")?.value || "").trim();
@@ -291,7 +249,7 @@ async function saveChanges(journalId, userId) {
   const remarks = ($("e-remarks")?.value || "").trim();
 
   if (!entry_date || !ref || !description) {
-    setStatus("Fill Date, Ref No, and Description first.", true);
+    setStatus("Fill Date, Ref No, and Description.", true);
     return;
   }
 
@@ -308,7 +266,7 @@ async function saveChanges(journalId, userId) {
 
   setStatus("Saving...");
 
-  // 1) Update journal header
+  // 1) update header
   const { error: headErr } = await sb
     .from("journal_entries")
     .update({
@@ -326,24 +284,24 @@ async function saveChanges(journalId, userId) {
 
   if (headErr) {
     console.error(headErr);
-    setStatus("Failed to update entry header. Check RLS/policies.", true);
+    setStatus("Header update failed (RLS/policy).", true);
     return;
   }
 
-  // 2) Soft-delete all existing lines for this journal (simplest + reliable)
-  const { error: delLinesErr } = await sb
+  // 2) soft delete old lines
+  const { error: delErr } = await sb
     .from("journal_lines")
     .update({ is_deleted: true })
     .eq("journal_id", journalId)
     .eq("user_id", userId);
 
-  if (delLinesErr) {
-    console.error(delLinesErr);
+  if (delErr) {
+    console.error(delErr);
     setStatus("Failed to update lines (soft delete).", true);
     return;
   }
 
-  // 3) Insert fresh lines from UI
+  // 3) insert fresh lines
   const fresh = uiLines.map((l) => {
     const acct = COA_BY_ID[l.account_uuid];
     const account_name = acct ? `${acct.code} - ${acct.name}` : "";
@@ -353,7 +311,7 @@ async function saveChanges(journalId, userId) {
       journal_id: journalId,
       entry_date,
       ref,
-      account_id: l.account_uuid,     // ✅ always UUID now
+      account_id: l.account_uuid, // ✅ uuid always
       account_name,
       debit: l.debit,
       credit: l.credit,
@@ -366,18 +324,16 @@ async function saveChanges(journalId, userId) {
 
   if (insErr) {
     console.error(insErr);
-    setStatus("Failed to insert updated lines.", true);
+    setStatus("Insert failed (RLS/policy).", true);
     return;
   }
 
   setStatus("Saved ✅");
 
-  // Reload lines so the table stores real IDs again
-  const lines = await fetchLines(journalId);
+  const lines = await fetchLines(journalId, userId);
   renderLines(lines);
 }
 
-// Delete: soft delete entry + lines
 async function deleteEntry(journalId, userId) {
   const ok = confirm("Delete this journal entry?\n\n(This is soft delete.)");
   if (!ok) return;
@@ -392,7 +348,7 @@ async function deleteEntry(journalId, userId) {
 
   if (e1) {
     console.error(e1);
-    setStatus("Failed to delete journal entry.", true);
+    setStatus("Failed to delete entry (RLS/policy).", true);
     return;
   }
 
@@ -410,39 +366,36 @@ async function deleteEntry(journalId, userId) {
 
   setStatus("Deleted ✅");
 
-  // Go back to ledger
   const acctId = getQueryParam("account_id") || "";
   window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
 }
 
 // ==============================
-// Init Edit Page
+// INIT
 // ==============================
 (async function initEditPage() {
   try {
-    setStatus("Loading...");
-
-    const { data } = await sb.auth.getSession();
-    const session = data.session;
-    if (!session?.user) {
-      setStatus("Not logged in. Please login first.", true);
-      return;
-    }
-
-    const user = session.user;
-
     const journalId = getQueryParam("journal_id");
     if (!journalId) {
-      setStatus("Missing journal_id in URL.", true);
+      setStatus("Missing journal_id in URL", true);
       return;
     }
 
-    // 1) Load COA first
-    COA = await sbFetchCOA(user.id);
-    rebuildCoaIndex();
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
 
-    // 2) Load entry header
-    const entry = await fetchEntry(journalId);
+    const user = data?.session?.user;
+    if (!user) {
+      setStatus("Please login first (open index.html and login).", true);
+      return;
+    }
+
+    // load COA first so selects have options
+    await loadCOA(user.id);
+
+    // load entry + fill header fields
+    const entry = await fetchEntry(journalId, user.id);
+
     $("e-date").value = entry.entry_date || "";
     $("e-ref").value = entry.ref || "";
     $("e-desc").value = entry.description || "";
@@ -451,16 +404,14 @@ async function deleteEntry(journalId, userId) {
     $("e-client").value = entry.client_vendor || "";
     $("e-remarks").value = entry.remarks || "";
 
-    // 3) Load lines and render
-    const lines = await fetchLines(journalId);
+    // load + render lines
+    const lines = await fetchLines(journalId, user.id);
     renderLines(lines);
 
-    // Buttons
-   $("btn-add").onclick = addEmptyLine;
-$("btn-save").onclick = () => saveChanges(journalId, user.id);
-$("btn-delete").onclick = () => deleteEntry(journalId, user.id);
-
-    // Back button (keeps account_id in URL if present)
+    // wire buttons
+    $("btn-add").onclick = () => addEmptyLine();
+    $("btn-save").onclick = () => saveChanges(journalId, user.id);
+    $("btn-delete").onclick = () => deleteEntry(journalId, user.id);
     $("btn-back").onclick = () => {
       const acctId = getQueryParam("account_id") || "";
       window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
@@ -469,6 +420,6 @@ $("btn-delete").onclick = () => deleteEntry(journalId, user.id);
     setStatus("Loaded ✅");
   } catch (e) {
     console.error(e);
-    setStatus("Failed to load edit page. Check console.", true);
+    setStatus(e?.message || "Failed to load edit page.", true);
   }
 })();
