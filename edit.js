@@ -348,16 +348,7 @@ async function deleteEntry(journalId, userId) {
 
   setStatus("Deleting...");
 
-  setStatus("Deleted ✅");
-
-// ✅ go back to ledger after delete
-const acctId = getQueryParam("account_id") || "";
-const url = new URL("./index.html", window.location.href);
-url.searchParams.set("account_id", acctId);
-url.hash = "ledger";
-window.location.replace(url.toString());
-return;
-
+  // 1) soft delete entry header
   const { error: e1 } = await sb
     .from("journal_entries")
     .update({ is_deleted: true, updated_at: new Date().toISOString() })
@@ -370,6 +361,7 @@ return;
     return;
   }
 
+  // 2) soft delete lines
   const { error: e2 } = await sb
     .from("journal_lines")
     .update({ is_deleted: true })
@@ -378,14 +370,18 @@ return;
 
   if (e2) {
     console.error(e2);
-    setStatus("Entry deleted, but failed to delete lines.", true);
-    return;
+    setStatus("Deleted entry but failed deleting lines.", true);
+    // still continue redirect (optional)
   }
 
   setStatus("Deleted ✅");
 
+  // ✅ go back to ledger
   const acctId = getQueryParam("account_id") || "";
-  window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
+  const url = new URL("./index.html", window.location.href);
+  url.searchParams.set("account_id", acctId);
+  url.hash = "ledger";
+  window.location.replace(url.toString());
 }
 
 // ==============================
@@ -423,8 +419,6 @@ return;
     $("e-remarks").value = entry.remarks || "";
 
     // load + render lines
-    const lines = await fetchLines(journalId, user.id);
-    renderLines(lines);
 
     // wire buttons
     $("btn-add").onclick = () => addEmptyLine();
