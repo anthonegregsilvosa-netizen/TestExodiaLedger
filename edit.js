@@ -115,8 +115,9 @@ async function fetchEntry(journalId, userId) {
   return data;
 }
 
-async function fetchLines(journalId, userId) {
-  const { data, error } = await sb
+async function fetchLines(journalId, userId, entryDate, ref) {
+  // 1) normal: lines linked by journal_id
+  const { data: linked, error: e1 } = await sb
     .from("journal_lines")
     .select("*")
     .eq("journal_id", journalId)
@@ -124,8 +125,33 @@ async function fetchLines(journalId, userId) {
     .eq("is_deleted", false)
     .order("created_at", { ascending: true });
 
-  if (error) throw error;
-  return data || [];
+  if (e1) throw e1;
+  if (linked && linked.length) return linked;
+
+  // 2) fallback: OLD records (journal_id was NULL before)
+  const { data: legacy, error: e2 } = await sb
+    .from("journal_lines")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_deleted", false)
+    .eq("entry_date", entryDate)
+    .eq("ref", ref)
+    .order("created_at", { ascending: true });
+
+  if (e2) throw e2;
+
+  // 3) auto-fix: attach these old lines to this journalId (so next time it loads normally)
+  if (legacy && legacy.length) {
+    await sb
+      .from("journal_lines")
+      .update({ journal_id: journalId })
+      .eq("user_id", userId)
+      .eq("entry_date", entryDate)
+      .eq("ref", ref)
+      .is("journal_id", null);
+  }
+
+  return legacy || [];
 }
 
 // ==============================
@@ -338,8 +364,8 @@ url.hash = "ledger";
 window.location.replace(url.toString());
 return;
 
-  const lines = await fetchLines(journalId, userId);
-  renderLines(lines);
+  const lines = await fetchLines(journalId, user.id, entry.entry_date, entry.ref);
+renderLines(lines);
 }
 
 async function deleteEntry(journalId, userId) {
