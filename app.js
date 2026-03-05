@@ -1262,15 +1262,18 @@ function renderHistory() {
       entries.forEach((e) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${esc(e.entry_date || "")}</td>
-          <td>${esc(formatDateTime(e.created_at))}</td>
-          <td>${esc(e.ref || "")}</td>
-          <td>${esc(e.description || "")}</td>
-          <td>${esc(e.department || "")}</td>
-          <td>${esc(e.payment_method || "")}</td>
-          <td>${esc(e.client_vendor || "")}</td>
-          <td>${esc(e.remarks || "")}</td>
-        `;
+  <td>${esc(e.entry_date || "")}</td>
+  <td>${esc(formatDateTime(e.created_at))}</td>
+  <td>${esc(e.ref || "")}</td>
+  <td>${esc(e.description || "")}</td>
+  <td>${esc(e.department || "")}</td>
+  <td>${esc(e.payment_method || "")}</td>
+  <td>${esc(e.client_vendor || "")}</td>
+  <td>${esc(e.remarks || "")}</td>
+  <td>
+    <button class="btn" onclick="viewHistoryEntry('${e.id}')">View</button>
+  </td>
+`;
         tbody.appendChild(tr);
       });
     })
@@ -1287,6 +1290,77 @@ function formatDateTime(iso) {
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleString();
 }
+
+window.closeHistoryModal = function closeHistoryModal() {
+  const m = $("history-modal");
+  if (m) m.style.display = "none";
+};
+
+window.viewHistoryEntry = async function viewHistoryEntry(journal_id) {
+  if (!currentUser) return alert("Please login first.");
+
+  const modal = $("history-modal");
+  const linesBody = $("hm-lines");
+  if (!modal || !linesBody) return alert("History modal not found in HTML.");
+
+  // fetch header
+  const { data: entry, error } = await sb
+    .from("journal_entries")
+    .select("*")
+    .eq("id", journal_id)
+    .eq("user_id", currentUser.id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    alert("Failed to load journal entry.");
+    return;
+  }
+
+  // fill header
+  $("hm-date").textContent = entry.entry_date || "";
+  $("hm-ref").textContent = entry.ref || "";
+  $("hm-desc").textContent = entry.description || "";
+  $("hm-dept").textContent = entry.department || "";
+  $("hm-pay").textContent = entry.payment_method || "";
+  $("hm-client").textContent = entry.client_vendor || "";
+  $("hm-remarks").textContent = entry.remarks || "";
+
+  // fetch lines
+  const jLines = await sbFetchJournalLinesForEntry(journal_id);
+
+  // render lines
+  linesBody.innerHTML = "";
+  let firstAccountId = "";
+
+  jLines.forEach((l) => {
+    if (!firstAccountId) firstAccountId = l.account_id || "";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(l.account_name || "")}</td>
+      <td style="text-align:right;">${money(l.debit || 0)}</td>
+      <td style="text-align:right;">${money(l.credit || 0)}</td>
+    `;
+    linesBody.appendChild(tr);
+  });
+
+  if (jLines.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3" style="text-align:center; padding:10px;">No lines found.</td>`;
+    linesBody.appendChild(tr);
+  }
+
+  // wire Edit/Delete button
+  const btn = $("hm-edit-btn");
+  if (btn) {
+    btn.onclick = () => {
+      const acct = encodeURIComponent(firstAccountId || "");
+      window.location.href = `./edit.html?journal_id=${encodeURIComponent(journal_id)}&account_id=${acct}`;
+    };
+  }
+
+  modal.style.display = "grid";
+};
 
 // ==============================
 // Restore session on refresh
