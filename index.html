@@ -403,6 +403,49 @@
     </table>
 
     <p id="history-status"></p>
+
+<!-- ========================= HISTORY VIEW MODAL ========================= -->
+<div id="history-modal" class="modal-backdrop" style="display:none;">
+  <div class="modal-card" style="width: 900px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Journal Entry Details</div>
+        <div class="modal-sub" id="hm-sub">View transaction details</div>
+      </div>
+      <button class="modal-x" onclick="closeHistoryModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div style="display:grid; grid-template-columns: 220px 1fr; gap:10px;">
+        <div><b>Date:</b> <span id="hm-date"></span></div>
+        <div><b>Ref:</b> <span id="hm-ref"></span></div>
+        <div style="grid-column:1 / span 2;"><b>Description:</b> <span id="hm-desc"></span></div>
+        <div><b>Department:</b> <span id="hm-dept"></span></div>
+        <div><b>Payment:</b> <span id="hm-pay"></span></div>
+        <div><b>Client/Vendor:</b> <span id="hm-client"></span></div>
+        <div style="grid-column:1 / span 2;"><b>Remarks:</b> <span id="hm-remarks"></span></div>
+      </div>
+
+      <h3 style="margin-top:14px;">Lines</h3>
+      <table border="1" cellpadding="6" style="width:100%;">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th style="text-align:right;">Debit</th>
+            <th style="text-align:right;">Credit</th>
+          </tr>
+        </thead>
+        <tbody id="hm-lines"></tbody>
+      </table>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+        <button class="btn" onclick="closeHistoryModal()">Close</button>
+        <button class="btn primary" id="hm-edit-btn">Edit / Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+    
   </section>
 </div>
 
