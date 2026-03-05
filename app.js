@@ -223,6 +223,25 @@ async function sbFetchJournalLines() {
   return (data || []).map(normalizeLine);
 }
 
+async function sbFetchJournalLinesForEntry(journal_id) {
+  if (!currentUser) return [];
+
+  const { data, error } = await sb
+    .from("journal_lines")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .eq("journal_id", journal_id)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Lines fetch error:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
 async function sbInsertJournalLines(rows) {
   const { error } = await sb.from("journal_lines").insert(rows);
   if (error) throw error;
