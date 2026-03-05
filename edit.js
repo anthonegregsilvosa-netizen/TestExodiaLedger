@@ -116,7 +116,7 @@ async function fetchEntry(journalId, userId) {
 }
 
 async function fetchLines(journalId, userId, entryDate, ref) {
-  // 1) normal: lines linked by journal_id
+  // try normal linked lines
   const { data: linked, error: e1 } = await sb
     .from("journal_lines")
     .select("*")
@@ -128,7 +128,7 @@ async function fetchLines(journalId, userId, entryDate, ref) {
   if (e1) throw e1;
   if (linked && linked.length) return linked;
 
-  // 2) fallback: OLD records (journal_id was NULL before)
+  // fallback for old rows (matched by date+ref)
   const { data: legacy, error: e2 } = await sb
     .from("journal_lines")
     .select("*")
@@ -140,7 +140,7 @@ async function fetchLines(journalId, userId, entryDate, ref) {
 
   if (e2) throw e2;
 
-  // 3) auto-fix: attach these old lines to this journalId (so next time it loads normally)
+  // repair: attach journal_id to legacy rows if they were null
   if (legacy && legacy.length) {
     await sb
       .from("journal_lines")
@@ -374,7 +374,6 @@ async function deleteEntry(journalId, userId) {
 
   setStatus("Deleting...");
 
-  // 1) soft delete entry header
   const { error: e1 } = await sb
     .from("journal_entries")
     .update({ is_deleted: true, updated_at: new Date().toISOString() })
@@ -387,7 +386,6 @@ async function deleteEntry(journalId, userId) {
     return;
   }
 
-  // 2) soft delete lines
   const { error: e2 } = await sb
     .from("journal_lines")
     .update({ is_deleted: true })
@@ -396,11 +394,19 @@ async function deleteEntry(journalId, userId) {
 
   if (e2) {
     console.error(e2);
-    setStatus("Deleted entry but failed deleting lines.", true);
-    // still continue redirect (optional)
+    setStatus("Entry deleted, but failed to delete lines.", true);
+    return;
   }
 
   setStatus("Deleted ✅");
+
+  // go back to ledger
+  const acctId = getQueryParam("account_id") || "";
+  const url = new URL("./index.html", window.location.href);
+  url.searchParams.set("account_id", acctId);
+  url.hash = "ledger";
+  window.location.replace(url.toString());
+}
 
   // ✅ go back to ledger
   const acctId = getQueryParam("account_id") || "";
