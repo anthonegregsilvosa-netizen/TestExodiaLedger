@@ -356,16 +356,13 @@ async function saveChanges(journalId, userId) {
 
  setStatus("Saved ✅");
 
-// ✅ go back to ledger after save
-const acctId = getQueryParam("account_id") || "";
-const url = new URL("./index.html", window.location.href);
-url.searchParams.set("account_id", acctId);
-url.hash = "ledger";
-window.location.replace(url.toString());
-return;
-
-  const lines = await fetchLines(journalId, user.id, entry.entry_date, entry.ref);
-renderLines(lines);
+    // ✅ go back to ledger after save
+  const acctId = getQueryParam("account_id") || "";
+  const url = new URL("./index.html", window.location.href);
+  url.searchParams.set("account_id", acctId);
+  url.hash = "ledger";
+  window.location.replace(url.toString());
+  return;
 }
 
 async function deleteEntry(journalId, userId) {
@@ -399,14 +396,6 @@ async function deleteEntry(journalId, userId) {
   }
 
   setStatus("Deleted ✅");
-
-  // go back to ledger
-  const acctId = getQueryParam("account_id") || "";
-  const url = new URL("./index.html", window.location.href);
-  url.searchParams.set("account_id", acctId);
-  url.hash = "ledger";
-  window.location.replace(url.toString());
-}
 
   // ✅ go back to ledger
   const acctId = getQueryParam("account_id") || "";
@@ -451,6 +440,8 @@ async function deleteEntry(journalId, userId) {
     $("e-remarks").value = entry.remarks || "";
 
     // load + render lines
+const jLines = await fetchLines(journalId, user.id, entry.entry_date, entry.ref);
+renderLines(jLines);
 
     // wire buttons
     $("btn-add").onclick = () => addEmptyLine();
