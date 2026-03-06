@@ -299,6 +299,27 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+.coa-summary-card{
+  background:#fff;
+  border:1px solid #d9d9d9;
+  border-radius:12px;
+  padding:14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.coa-summary-title{
+  font-size:14px;
+  color:#666;
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.coa-summary-value{
+  font-size:22px;
+  font-weight:700;
+  color:#222;
+}
     
   </style>
 </head>
@@ -371,6 +392,33 @@ Apply
   <!-- ========================= COA ========================= -->
   <section id="coa">
     <h2>Chart of Accounts</h2>
+
+    <div id="coa-summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; max-width:1000px; margin:12px 0 16px;">
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Assets</div>
+    <div class="coa-summary-value" id="sum-asset">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Liabilities</div>
+    <div class="coa-summary-value" id="sum-liability">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Equity</div>
+    <div class="coa-summary-value" id="sum-equity">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Revenue</div>
+    <div class="coa-summary-value" id="sum-revenue">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Expenses</div>
+    <div class="coa-summary-value" id="sum-expense">0.00</div>
+  </div>
+</div>
 
     <div id="filters" style="margin:10px 0;">
       <button onclick="filterCOA('All')">All</button>
