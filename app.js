@@ -637,6 +637,20 @@ window.showJournal = function (which) {
   if (which === "history") renderHistory();
 };
 
+window.showWorksheet = function (view) {
+  const trial = $("ws-trial");
+  const pl = $("ws-pl");
+  const sfp = $("ws-sfp");
+
+  if (trial) trial.style.display = (view === "trial") ? "block" : "none";
+  if (pl) pl.style.display = (view === "pl") ? "block" : "none";
+  if (sfp) sfp.style.display = (view === "sfp") ? "block" : "none";
+
+  if (view === "trial") showWorksheet("trial");
+  if (view === "pl") renderProfitAndLoss();
+  if (view === "sfp") renderStatementOfFinancialPosition();
+};
+
 // ==============================
 // Tabs
 // ==============================
@@ -1224,6 +1238,84 @@ function renderTrialBalance() {
     status.textContent =
       diff < 0.00001 ? "Balanced ✅" : `Not balanced ❌ (Difference: ${money(diff)})`;
   }
+
+function renderProfitAndLoss() {
+  const tbody = $("pl-body");
+  const netEl = $("pl-net");
+  if (!tbody || !netEl) return;
+
+  tbody.innerHTML = "";
+
+  const balances = computeBalances();
+
+  let totalRevenue = 0;
+  let totalExpense = 0;
+
+  COA.forEach((a) => {
+    const bal = balances[a.id] || 0;
+    const type = String(a.type || "").trim();
+
+    if (type === "Revenue") totalRevenue += bal;
+    if (type === "Expense" || type === "Expenses") totalExpense += bal;
+  });
+
+  const net = totalRevenue - totalExpense;
+
+  tbody.innerHTML = `
+    <tr>
+      <td><b>Total Revenue</b></td>
+      <td style="text-align:right;">${money(totalRevenue)}</td>
+    </tr>
+    <tr>
+      <td><b>Total Expenses</b></td>
+      <td style="text-align:right;">${money(totalExpense)}</td>
+    </tr>
+  `;
+
+  netEl.textContent = money(net);
+}
+
+  function renderStatementOfFinancialPosition() {
+  const tbody = $("sfp-body");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const balances = computeBalances();
+
+  let totalAssets = 0;
+  let totalLiabilities = 0;
+  let totalEquity = 0;
+
+  COA.forEach((a) => {
+    const bal = balances[a.id] || 0;
+    const type = String(a.type || "").trim();
+
+    if (type === "Asset" || type === "Assets") totalAssets += bal;
+    if (type === "Liability" || type === "Liabilities") totalLiabilities += bal;
+    if (type === "Equity") totalEquity += bal;
+  });
+
+  tbody.innerHTML = `
+    <tr>
+      <td><b>Total Assets</b></td>
+      <td style="text-align:right;">${money(totalAssets)}</td>
+    </tr>
+    <tr>
+      <td><b>Total Liabilities</b></td>
+      <td style="text-align:right;">${money(totalLiabilities)}</td>
+    </tr>
+    <tr>
+      <td><b>Total Equity</b></td>
+      <td style="text-align:right;">${money(totalEquity)}</td>
+    </tr>
+    <tr>
+      <td><b>Total Liabilities and Equity</b></td>
+      <td style="text-align:right;">${money(totalLiabilities + totalEquity)}</td>
+    </tr>
+  `;
+}
+  
 }
 
 // ==============================
