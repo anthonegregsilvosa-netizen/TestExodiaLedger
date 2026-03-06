@@ -563,6 +563,9 @@ Apply
 
   <!-- Trial Balance -->
   <div id="ws-trial">
+    <div style="margin:10px 0;">
+  <button class="btn primary" onclick="downloadTrialBalancePDF()">Download PDF</button>
+</div>
     <table border="1" cellpadding="6">
       <thead>
         <tr>
@@ -728,6 +731,8 @@ Apply
 
 <!-- ========================= SCRIPTS ========================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="./app.js"></script>
 
 </body>
