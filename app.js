@@ -646,7 +646,7 @@ window.showWorksheet = function (view) {
   if (pl) pl.style.display = (view === "pl") ? "block" : "none";
   if (sfp) sfp.style.display = (view === "sfp") ? "block" : "none";
 
-  if (view === "trial") showWorksheet("trial");
+  if (view === "trial") renderTrialBalance();
   if (view === "pl") renderProfitAndLoss();
   if (view === "sfp") renderStatementOfFinancialPosition();
 };
@@ -1238,6 +1238,7 @@ function renderTrialBalance() {
     status.textContent =
       diff < 0.00001 ? "Balanced ✅" : `Not balanced ❌ (Difference: ${money(diff)})`;
   }
+}
 
 function renderProfitAndLoss() {
   const tbody = $("pl-body");
@@ -1275,7 +1276,7 @@ function renderProfitAndLoss() {
   netEl.textContent = money(net);
 }
 
-  function renderStatementOfFinancialPosition() {
+function renderStatementOfFinancialPosition() {
   const tbody = $("sfp-body");
   if (!tbody) return;
 
@@ -1315,7 +1316,117 @@ function renderProfitAndLoss() {
     </tr>
   `;
 }
-  
+
+window.downloadTrialBalancePDF = function downloadTrialBalancePDF() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("PDF library not loaded.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const title = "Trial Balance";
+  const from = filterFrom || "";
+  const to = filterTo || "";
+
+  let subtitle = "All transactions";
+  if (from && to) subtitle = `Date Range: ${from} to ${to}`;
+  else if (from) subtitle = `From: ${from}`;
+  else if (to) subtitle = `To: ${to}`;
+
+  doc.setFontSize(16);
+  doc.text(title, 14, 18);
+
+  doc.setFontSize(10);
+  doc.text(subtitle, 14, 25);
+
+  const balances = computeBalances();
+
+  const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
+
+  const list = [...COA].sort((a, b) => {
+    const ta = typeOrder[a.type] ?? 99;
+    const tb = typeOrder[b.type] ?? 99;
+    if (ta !== tb) return ta - tb;
+
+    const ca = codeNum(a.code);
+    const cb = codeNum(b.code);
+    if (ca !== cb) return ca - cb;
+
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+
+  let totalDebit = 0;
+  let totalCredit = 0;
+
+  const rows = list.map((a) => {
+    const bal = balances[a.id] || 0;
+
+    let debit = 0;
+    let credit = 0;
+
+    if (a.normal === "Debit") {
+      debit = Math.max(bal, 0);
+      credit = Math.max(-bal, 0);
+    } else {
+      credit = Math.max(bal, 0);
+      debit = Math.max(-bal, 0);
+    }
+
+    totalDebit += debit;
+    totalCredit += credit;
+
+    return [
+      a.code || "",
+      a.name || "",
+      a.type || "",
+      money(debit),
+      money(credit),
+    ];
+  });
+
+  doc.autoTable({
+    startY: 30,
+    head: [["Code", "Account Name", "Type", "Debit", "Credit"]],
+    body: rows,
+    foot: [[
+      "",
+      "",
+      "Total",
+      money(totalDebit),
+      money(totalCredit)
+    ]],
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+    },
+    headStyles: {
+      fillColor: [51, 51, 51],
+    },
+    footStyles: {
+      fillColor: [240, 240, 240],
+      textColor: [0, 0, 0],
+      fontStyle: "bold",
+    },
+    columnStyles: {
+      3: { halign: "right" },
+      4: { halign: "right" },
+    },
+  });
+
+  const diff = Math.abs(totalDebit - totalCredit);
+  const status = diff < 0.00001
+    ? "Balanced"
+    : `Not balanced (Difference: ${money(diff)})`;
+
+  const finalY = doc.lastAutoTable.finalY || 30;
+  doc.setFontSize(10);
+  doc.text(`Status: ${status}`, 14, finalY + 10);
+
+  doc.save("trial-balance.pdf");
+};
+
 }
 
 // ==============================
