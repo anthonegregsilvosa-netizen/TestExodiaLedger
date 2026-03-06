@@ -949,6 +949,27 @@ function renderCOA() {
   tbody.innerHTML = "";
   const balances = computeBalances();
 
+    const totalsByType = {
+    Asset: 0,
+    Liability: 0,
+    Equity: 0,
+    Revenue: 0,
+    Expense: 0,
+  };
+
+  COA.forEach((a) => {
+    const bal = balances[a.id] || 0;
+    if (totalsByType[a.type] !== undefined) {
+      totalsByType[a.type] += bal;
+    }
+  });
+
+  if ($("sum-asset")) $("sum-asset").textContent = money(totalsByType.Asset || 0);
+  if ($("sum-liability")) $("sum-liability").textContent = money(totalsByType.Liability || 0);
+  if ($("sum-equity")) $("sum-equity").textContent = money(totalsByType.Equity || 0);
+  if ($("sum-revenue")) $("sum-revenue").textContent = money(totalsByType.Revenue || 0);
+  if ($("sum-expense")) $("sum-expense").textContent = money(totalsByType.Expense || 0);
+
   const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
 
   const list = COA
