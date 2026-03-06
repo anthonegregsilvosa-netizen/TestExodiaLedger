@@ -812,9 +812,10 @@ window.addLine = function () {
   credit.style.width = "100%";
 
   const delBtn = document.createElement("button");
-delBtn.textContent = "✕";
+delBtn.textContent = "Remove";
 delBtn.className = "btn-soft";
-delBtn.style.padding = "8px 10px";
+delBtn.style.fontSize = "14px";
+delBtn.style.padding = "8px 12px";
 delBtn.onclick = () => tr.remove();
 
   tr.appendChild(tdWrap(wrap));
