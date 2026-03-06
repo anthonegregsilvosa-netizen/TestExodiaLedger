@@ -8,6 +8,8 @@ const FILTER_YEAR_KEY = "exodiaLedger.filterYear.v1";
 const FILTER_MONTH_KEY = "exodiaLedger.filterMonth.v1";
 const LEDGER_ACCOUNT_KEY = "exodiaLedger.ledgerAccount.v1";
 const JOURNAL_VIEW_KEY = "exodiaLedger.journalView.v1";
+const FILTER_FROM_KEY = "exodiaLedger.filterFrom.v1";
+const FILTER_TO_KEY = "exodiaLedger.filterTo.v1";
 
 // ==============================
 // Supabase Setup
@@ -36,8 +38,8 @@ let COA = [];
 let currentCOAType = "All";
 let lines = []; // loaded from Supabase (journal_lines)
 
-let filterYear = "";
-let filterMonth = "";
+let filterFrom = ""; // YYYY-MM-DD
+let filterTo = "";   // YYYY-MM-DD
 
 // ==============================
 // AUTH UI helpers
@@ -580,15 +582,28 @@ function textToAccountId(text) {
 // ==============================
 // Filters (Year/Month)
 // ==============================
-window.applyDateFilter = function () {
-  const y = $("filter-year")?.value ?? "";
-  const m = $("filter-month")?.value ?? "";
+window.applyDateRangeFilter = function () {
+  const from = $("filter-from")?.value || "";
+  const to = $("filter-to")?.value || "";
 
-  filterYear = !y || y === "All" ? "" : y;
-  filterMonth = !m || m === "All" ? "" : m;
+  filterFrom = from;
+  filterTo = to;
 
-  localStorage.setItem(FILTER_YEAR_KEY, y);
-  localStorage.setItem(FILTER_MONTH_KEY, m);
+  localStorage.setItem(FILTER_FROM_KEY, from);
+  localStorage.setItem(FILTER_TO_KEY, to);
+
+  renderCOA();
+  renderLedger();
+  renderTrialBalance();
+};
+
+window.clearDateRange = function () {
+  filterFrom = "";
+  filterTo = "";
+  if ($("filter-from")) $("filter-from").value = "";
+  if ($("filter-to")) $("filter-to").value = "";
+  localStorage.removeItem(FILTER_FROM_KEY);
+  localStorage.removeItem(FILTER_TO_KEY);
 
   renderCOA();
   renderLedger();
@@ -1005,11 +1020,11 @@ function renderLedger() {
     .filter((l) => !l.is_deleted)
     .filter((l) => (l.resolvedAccountId || l.accountId) === accountId)
     .filter((l) => {
-      const d = String(l.entry_date || "");
-      if (filterYear && !d.startsWith(filterYear)) return false;
-      if (filterMonth && Number(d.slice(5, 7)) !== Number(filterMonth)) return false;
-      return true;
-    })
+  const d = String(l.entry_date || "");
+  if (filterFrom && d < filterFrom) return false;
+  if (filterTo && d > filterTo) return false;
+  return true;
+})
     .sort(
       (a, b) =>
         String(a.entry_date || "").localeCompare(String(b.entry_date || "")) ||
@@ -1075,11 +1090,11 @@ function computeBalances() {
   lines
     .filter((l) => !l.is_deleted)
     .filter((l) => {
-      const d = String(l.entry_date || "");
-      if (filterYear && !d.startsWith(filterYear)) return false;
-      if (filterMonth && Number(d.slice(5, 7)) !== Number(filterMonth)) return false;
-      return true;
-    })
+  const d = String(l.entry_date || "");
+  if (filterFrom && d < filterFrom) return false;
+  if (filterTo && d > filterTo) return false;
+  return true;
+})
     .forEach((l) => {
       const key = l.resolvedAccountId || l.accountId;
       const normal = normals[key] || "Debit";
@@ -1181,40 +1196,17 @@ async function initAppAfterLogin() {
   const ledgerSel = $("ledger-account");
   if (ledgerSel) ledgerSel.innerHTML = "";
 
-  const yearSel = $("filter-year");
-  if (yearSel) {
-    const yearsFromLines = lines
-      .map((l) => String(l.entry_date || "").slice(0, 4))
-      .filter((y) => y && /^\d{4}$/.test(y));
+  // restore saved date range
+const savedFrom = localStorage.getItem(FILTER_FROM_KEY) || "";
+const savedTo = localStorage.getItem(FILTER_TO_KEY) || "";
 
-    const years = Array.from(new Set(yearsFromLines)).sort();
+filterFrom = savedFrom;
+filterTo = savedTo;
 
-    yearSel.innerHTML = "";
-    const optAll = document.createElement("option");
-    optAll.value = "All";
-    optAll.textContent = "All";
-    yearSel.appendChild(optAll);
+if ($("filter-from")) $("filter-from").value = savedFrom;
+if ($("filter-to")) $("filter-to").value = savedTo;
 
-    years.forEach((y) => {
-      const opt = document.createElement("option");
-      opt.value = y;
-      opt.textContent = y;
-      yearSel.appendChild(opt);
-    });
-
-    const savedYear = localStorage.getItem(FILTER_YEAR_KEY) || "All";
-    const savedMonth = localStorage.getItem(FILTER_MONTH_KEY) || "";
-    if ($("filter-year")) $("filter-year").value = savedYear;
-    if ($("filter-month")) $("filter-month").value = savedMonth;
-  }
-
-  if ($("je-lines")) {
-    $("je-lines").innerHTML = "";
-    addLine();
-    addLine();
-  }
-
-  applyDateFilter();
+  applyDateRangeFilter();
 
   const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
 
