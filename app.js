@@ -618,9 +618,13 @@ window.showJournal = function (which) {
 
   const entry = $("journal");
   const hist = $("journal-history");
+  const dateBar = $("date-range-bar");
 
   if (entry) entry.style.display = (which === "entry") ? "block" : "none";
   if (hist) hist.style.display = (which === "history") ? "block" : "none";
+
+  // hide date range on Journal Entry, show on Journal History
+  if (dateBar) dateBar.style.display = (which === "history") ? "flex" : "none";
 
   if (which === "history") renderHistory();
 };
@@ -651,6 +655,16 @@ window.show = function (view) {
 
   const journalTb = $("journal-toolbar");
   if (journalTb) journalTb.style.display = (view === "journal") ? "block" : "none";
+
+    // Show date range on reports/history, hide on Journal Entry
+  const dateBar = $("date-range-bar");
+  const journalMode = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+
+  if (view === "journal" && journalMode === "entry") {
+    if (dateBar) dateBar.style.display = "none";
+  } else {
+    if (dateBar) dateBar.style.display = "flex";
+  }
 
   // Render main views + journal sub-view
   if (view === "coa") renderCOA();
