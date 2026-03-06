@@ -953,14 +953,28 @@ window.saveJournal = async function () {
     lines = await loadLinesFromDb();
     resolveLinesAccountIds();
 
-    $("je-lines").innerHTML = "";
-    addLine();
-    addLine();
+    // keep the selected date, clear the other fields
+if ($("je-refno")) $("je-refno").value = "";
+if ($("je-description")) $("je-description").value = "";
+if ($("je-dept")) $("je-dept").value = "";
+if ($("je-paymethod")) $("je-paymethod").value = "";
+if ($("je-client")) $("je-client").value = "";
+if ($("je-remarks")) $("je-remarks").value = "";
 
-    setStatus("Saved ✅ General Ledger updated automatically.");
-    renderCOA();
-    renderLedger();
-    renderTrialBalance();
+// clear journal lines and give 2 fresh rows
+$("je-lines").innerHTML = "";
+addLine();
+addLine();
+
+// remove red borders after successful save
+markRequired($("je-refno"), false);
+markRequired($("je-description"), false);
+markRequired($("je-date"), false);
+
+setStatus("Saved ✅ General Ledger updated automatically.");
+renderCOA();
+renderLedger();
+renderTrialBalance();
   } catch (e) {
     console.error(e);
     setStatus("Save failed ❌ Check console + Supabase policies.");
