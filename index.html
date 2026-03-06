@@ -299,18 +299,18 @@ Apply
 
     <br>
 
-    <table border="1" cellpadding="6">
-      <thead>
-        <tr>
-          <th>Account</th>
-          <th>Debit</th>
-          <th>Credit</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="je-lines"></tbody>
-    </table>
-
+    <table border="1" cellpadding="6" style="width:100%; max-width:900px; border-collapse:collapse; table-layout:fixed;">
+  <thead>
+    <tr>
+      <th style="width:55%;">Account</th>
+      <th style="width:18%;">Debit</th>
+      <th style="width:18%;">Credit</th>
+      <th style="width:9%;">X</th>
+    </tr>
+  </thead>
+  <tbody id="je-lines"></tbody>
+</table>
+    
     <button onclick="addLine()">Add Line</button>
     <button onclick="saveJournal()">Save Journal Entry</button>
 
