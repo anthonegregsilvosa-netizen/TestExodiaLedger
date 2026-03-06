@@ -592,9 +592,16 @@ window.applyDateRangeFilter = function () {
   localStorage.setItem(FILTER_FROM_KEY, from);
   localStorage.setItem(FILTER_TO_KEY, to);
 
-  renderCOA();
+    renderCOA();
   renderLedger();
-  renderTrialBalance();
+
+  const wsTrial = $("ws-trial");
+  const wsPL = $("ws-pl");
+  const wsSFP = $("ws-sfp");
+
+  if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+  else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+  else renderTrialBalance();
 };
 
 window.clearDateRange = function () {
@@ -605,9 +612,16 @@ window.clearDateRange = function () {
   localStorage.removeItem(FILTER_FROM_KEY);
   localStorage.removeItem(FILTER_TO_KEY);
 
-  renderCOA();
+    renderCOA();
   renderLedger();
-  renderTrialBalance();
+
+  const wsTrial = $("ws-trial");
+  const wsPL = $("ws-pl");
+  const wsSFP = $("ws-sfp");
+
+  if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+  else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+  else renderTrialBalance();
 };
 
 // ==============================
@@ -646,7 +660,7 @@ window.showWorksheet = function (view) {
   if (pl) pl.style.display = (view === "pl") ? "block" : "none";
   if (sfp) sfp.style.display = (view === "sfp") ? "block" : "none";
 
-  if (view === "trial") renderTrialBalance();
+  if (view === "trial") showWorksheet("trial");
   if (view === "pl") renderProfitAndLoss();
   if (view === "sfp") renderStatementOfFinancialPosition();
 };
@@ -691,7 +705,7 @@ window.show = function (view) {
   // Render main views + journal sub-view
   if (view === "coa") renderCOA();
   if (view === "ledger") renderLedger();
-  if (view === "trial") renderTrialBalance();
+  if (view === "trial") showWorksheet("trial");
 
   if (view === "journal") {
     // default: restore last journal sub-tab or show entry
@@ -1426,8 +1440,6 @@ window.downloadTrialBalancePDF = function downloadTrialBalancePDF() {
 
   doc.save("trial-balance.pdf");
 };
-
-}
 
 // ==============================
 // Init after login
