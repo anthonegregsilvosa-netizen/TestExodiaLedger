@@ -199,29 +199,26 @@
   <button onclick="openAddCoaModal()">+ Add Account</button>
 </div>
 
-  <!-- ✅ Year/Month stays always -->
-  <div style="margin:10px 0;">
-    Year:
-    <select id="filter-year" onchange="applyDateFilter()"></select>
+  <!-- ✅ DATE RANGE FILTER -->
+<div style="margin:10px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
 
-    Month:
-    <select id="filter-month" onchange="applyDateFilter()">
-      <option value="">All</option>
-      <option value="1">Jan</option>
-      <option value="2">Feb</option>
-      <option value="3">Mar</option>
-      <option value="4">Apr</option>
-      <option value="5">May</option>
-      <option value="6">Jun</option>
-      <option value="7">Jul</option>
-      <option value="8">Aug</option>
-      <option value="9">Sep</option>
-      <option value="10">Oct</option>
-      <option value="11">Nov</option>
-      <option value="12">Dec</option>
-    </select>
-  </div>
+  <b>Date Range:</b>
 
+  <label>
+    From:
+    <input type="date" id="filter-from" onchange="applyDateRangeFilter()" style="padding:6px;">
+  </label>
+
+  <label>
+    To:
+    <input type="date" id="filter-to" onchange="applyDateRangeFilter()" style="padding:6px;">
+  </label>
+
+  <button onclick="clearDateRange()" class="btn">
+    Clear
+  </button>
+</div>
+  
   <!-- ✅ JOURNAL OPTIONS BAR (only show on Journal tab via JS) -->
 <div id="journal-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
   <b>Journal Options:</b>
