@@ -626,6 +626,14 @@ window.showJournal = function (which) {
   // hide date range on Journal Entry, show on Journal History
   if (dateBar) dateBar.style.display = (which === "history") ? "flex" : "none";
 
+  if (which === "entry") {
+    const tbody = $("je-lines");
+    if (tbody && tbody.children.length === 0) {
+      addLine();
+      addLine();
+    }
+  }
+
   if (which === "history") renderHistory();
 };
 
@@ -782,7 +790,7 @@ window.addLine = function () {
 
   const acctInput = document.createElement("input");
   acctInput.placeholder = "Type to search account (code or name)...";
-  acctInput.style.width = "420px";
+  acctInput.style.width = "100%";
   acctInput.setAttribute("list", "coa-datalist");
 
   const acctId = document.createElement("input");
@@ -797,11 +805,11 @@ window.addLine = function () {
 
   const debit = document.createElement("input");
   debit.placeholder = "0.00";
-  debit.style.width = "140px";
+  debit.style.width = "100%";
 
   const credit = document.createElement("input");
   credit.placeholder = "0.00";
-  credit.style.width = "140px";
+  credit.style.width = "100%";
 
   const delBtn = document.createElement("button");
   delBtn.textContent = "X";
