@@ -350,7 +350,7 @@
     <button onclick="show('coa')">Chart of Accounts</button>
     <button onclick="show('journal')">Journal Entry</button>
     <button onclick="show('ledger')">General Ledger</button>
-    <button onclick="show('trial')">Trial Balance</button>
+    <button onclick="show('trial')">Worksheet</button>
   </header>
 
   <!-- ✅ COA OPTIONS BAR (only show on COA tab via JS) -->
@@ -552,8 +552,17 @@ Apply
 
   <!-- ========================= TRIAL ========================= -->
   <section id="trial" style="display:none;">
-    <h2>Trial Balance</h2>
+  <h2>Worksheet</h2>
 
+  <div style="margin:10px 0; padding:8px; border:1px solid #ccc;">
+    <b>Worksheet Options:</b>
+    <button onclick="showWorksheet('trial')">Trial Balance</button>
+    <button onclick="showWorksheet('pl')">Statement of Profit and Loss</button>
+    <button onclick="showWorksheet('sfp')">Statement of Financial Position</button>
+  </div>
+
+  <!-- Trial Balance -->
+  <div id="ws-trial">
     <table border="1" cellpadding="6">
       <thead>
         <tr>
@@ -575,7 +584,30 @@ Apply
     </table>
 
     <p id="tb-status"></p>
-  </section>
+  </div>
+
+  <!-- Statement of Profit and Loss -->
+  <div id="ws-pl" style="display:none;">
+    <h3>Statement of Profit and Loss</h3>
+    <table border="1" cellpadding="6" style="max-width:700px; width:100%;">
+      <tbody id="pl-body"></tbody>
+      <tfoot>
+        <tr>
+          <td><b>Net Profit / Loss</b></td>
+          <td id="pl-net" style="text-align:right;"><b>0.00</b></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Statement of Financial Position -->
+  <div id="ws-sfp" style="display:none;">
+    <h3>Statement of Financial Position</h3>
+    <table border="1" cellpadding="6" style="max-width:700px; width:100%;">
+      <tbody id="sfp-body"></tbody>
+    </table>
+  </div>
+</section>
 
   <!-- ========================= HISTORY ========================= -->
   <section id="journal-history" style="display:none;">
