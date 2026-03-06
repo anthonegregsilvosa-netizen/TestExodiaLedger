@@ -38,6 +38,31 @@ function money(n) {
   });
 }
 
+function refreshCoaDatalist() {
+  const listId = "edit-coa-datalist";
+  let dl = document.getElementById(listId);
+
+  if (!dl) {
+    dl = document.createElement("datalist");
+    dl.id = listId;
+    document.body.appendChild(dl);
+  }
+
+  dl.innerHTML = "";
+
+  COA.forEach((a) => {
+    const opt = document.createElement("option");
+    opt.value = `${a.code} - ${a.name}`;
+    dl.appendChild(opt);
+  });
+}
+
+function textToAccountId(text) {
+  const t = String(text || "").trim().toLowerCase();
+  const found = COA.find((a) => (`${a.code} - ${a.name}`).toLowerCase() === t);
+  return found ? found.id : "";
+}
+
 // ==============================
 // COA loading + resolver
 // ==============================
@@ -98,6 +123,7 @@ async function loadCOA(userId) {
   }));
 
   rebuildCoaIndex();
+  refreshCoaDatalist();
 }
 
 // ==============================
@@ -182,15 +208,41 @@ function addEmptyLine(prefill = null) {
 
   const tr = document.createElement("tr");
 
-  // account
+  // account (searchable)
   const tdA = document.createElement("td");
+
+  const wrap = document.createElement("div");
+  wrap.style.display = "grid";
+  wrap.style.gap = "6px";
 
   const resolved = prefill
     ? resolveAccountId(prefill.account_id, prefill.account_name)
     : "";
 
-  const sel = buildAccountSelect(resolved);
-  tdA.appendChild(sel);
+  const acctInput = document.createElement("input");
+  acctInput.type = "text";
+  acctInput.placeholder = "Type account code or name...";
+  acctInput.setAttribute("list", "edit-coa-datalist");
+
+  const hiddenId = document.createElement("input");
+  hiddenId.type = "hidden";
+  hiddenId.value = resolved || "";
+
+  if (prefill) {
+    if (prefill.account_name) {
+      acctInput.value = prefill.account_name;
+    } else if (resolved && COA_BY_ID[resolved]) {
+      acctInput.value = `${COA_BY_ID[resolved].code} - ${COA_BY_ID[resolved].name}`;
+    }
+  }
+
+  acctInput.addEventListener("input", () => {
+    hiddenId.value = textToAccountId(acctInput.value);
+  });
+
+  wrap.appendChild(acctInput);
+  wrap.appendChild(hiddenId);
+  tdA.appendChild(wrap);
 
   // debit
   const tdD = document.createElement("td");
@@ -238,13 +290,15 @@ function collectLinesFromUI() {
   const tbody = $("e-lines");
   const rows = [...(tbody?.querySelectorAll("tr") || [])];
 
-  const out = rows
+   const out = rows
     .map((tr) => {
-      const sel = tr.querySelector("select");
-      const inputs = tr.querySelectorAll("input");
-      const account_uuid = sel?.value || "";
-      const debit = parseMoney(inputs?.[0]?.value);
-      const credit = parseMoney(inputs?.[1]?.value);
+      const hidden = tr.querySelector('input[type="hidden"]');
+      const allInputs = tr.querySelectorAll('input[type="text"]');
+
+      const account_uuid = hidden?.value || "";
+      const debit = parseMoney(allInputs?.[1]?.value);
+      const credit = parseMoney(allInputs?.[2]?.value);
+
       return { account_uuid, debit, credit };
     })
     .filter((x) => x.account_uuid && (x.debit !== 0 || x.credit !== 0));
