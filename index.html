@@ -160,6 +160,144 @@
   font-size:12px;
   margin-top:8px;
 }
+
+/* =========================
+   JOURNAL ENTRY PROFESSIONAL STYLE
+========================= */
+.je-card{
+  max-width: 980px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  padding: 18px;
+  margin-top: 12px;
+}
+
+.je-section-title{
+  font-size: 14px;
+  font-weight: 700;
+  margin: 4px 0 12px;
+  color: #333;
+}
+
+.je-grid{
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  max-width: 940px;
+}
+
+.je-grid label{
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+.je-grid input,
+.je-grid textarea,
+.je-grid select{
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.je-grid input:focus,
+.je-grid textarea:focus,
+.je-grid select:focus{
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+
+.je-lines-wrap{
+  margin-top: 16px;
+}
+
+.je-lines-table{
+  width: 100%;
+  max-width: 940px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.je-lines-table th{
+  background: #f5f6f8;
+  font-weight: 700;
+  color: #333;
+  border: 1px solid #d9d9d9;
+  padding: 10px;
+}
+
+.je-lines-table td{
+  border: 1px solid #e3e3e3;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.je-lines-table input,
+.je-lines-table select{
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.je-lines-table input:focus,
+.je-lines-table select:focus{
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+.je-actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.btn-soft{
+  padding: 10px 14px;
+  border: 1px solid #c7c7c7;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-soft:hover{
+  background: #f7f7f7;
+}
+
+.btn-dark{
+  padding: 10px 16px;
+  border: 1px solid #333;
+  background: #333;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-dark:hover{
+  background: #222;
+}
+
+.je-status{
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
     
   </style>
 </head>
@@ -259,14 +397,17 @@ Apply
 
   <!-- ========================= JOURNAL ========================= -->
   <section id="journal" style="display:none;">
-    <h2>Journal Entry</h2>
+  <h2>Journal Entry</h2>
 
-    <div style="display:grid; grid-template-columns: 220px 1fr; gap:8px; max-width:900px;">
+  <div class="je-card">
+    <div class="je-section-title">Entry Information</div>
+
+    <div class="je-grid">
       <label>Date *
         <input type="date" id="je-date">
       </label>
 
-      <label style="grid-column:1 / span 2;">
+      <label>
         Reference No. *
         <input type="text" id="je-refno">
       </label>
@@ -277,45 +418,50 @@ Apply
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Department / Cost Center:
+        Department / Cost Center
         <input type="text" id="je-dept">
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Payment Method:
+        Payment Method
         <input type="text" id="je-paymethod">
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Client / Vendor:
+        Client / Vendor
         <input type="text" id="je-client">
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Remarks:
+        Remarks
         <input type="text" id="je-remarks">
       </label>
     </div>
 
-    <br>
+    <div class="je-lines-wrap">
+      <div class="je-section-title">Journal Lines</div>
 
-    <table border="1" cellpadding="6" style="width:100%; max-width:900px; border-collapse:collapse; table-layout:fixed;">
-  <thead>
-    <tr>
-      <th style="width:55%;">Account</th>
-      <th style="width:18%;">Debit</th>
-      <th style="width:18%;">Credit</th>
-      <th style="width:9%;">X</th>
-    </tr>
-  </thead>
-  <tbody id="je-lines"></tbody>
-</table>
-    
-    <button onclick="addLine()">Add Line</button>
-    <button onclick="saveJournal()">Save Journal Entry</button>
+      <table class="je-lines-table">
+        <thead>
+          <tr>
+            <th style="width:55%;">Account</th>
+            <th style="width:18%;">Debit</th>
+            <th style="width:18%;">Credit</th>
+            <th style="width:9%;">X</th>
+          </tr>
+        </thead>
+        <tbody id="je-lines"></tbody>
+      </table>
+    </div>
 
-    <p id="je-status"></p>
-  </section>
+    <div class="je-actions">
+      <button class="btn-soft" onclick="addLine()">+ Add Line</button>
+      <button class="btn-dark" onclick="saveJournal()">Save Journal Entry</button>
+    </div>
+
+    <p id="je-status" class="je-status"></p>
+  </div>
+</section>
 
   <!-- ========================= LEDGER ========================= -->
   
