@@ -161,6 +161,114 @@
   margin-top:8px;
 }
 
+    /* =========================
+   GENERAL LEDGER STYLING
+========================= */
+#ledger {
+  max-width: 1180px;
+}
+
+#ledger h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+#ledger label,
+#ledger select,
+#ledger input,
+#ledger table,
+#ledger th,
+#ledger td {
+  font-family: Arial, sans-serif;
+}
+
+#ledger-search {
+  width: 360px !important;
+  padding: 10px 12px !important;
+  font-size: 15px !important;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+#ledger-account {
+  margin-top: 10px;
+  margin-bottom: 14px;
+  width: 420px;
+  max-width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #fff;
+}
+
+#ledger table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#ledger thead th {
+  background: #f3f4f6;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  padding: 12px 10px;
+  border: 1px solid #d8d8d8;
+  white-space: nowrap;
+}
+
+#ledger tbody td {
+  font-size: 14px;
+  padding: 10px 10px;
+  border: 1px solid #e1e1e1;
+  vertical-align: middle;
+}
+
+#ledger tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+#ledger tbody tr:hover {
+  background: #f4f8ff;
+}
+
+#ledger tbody td:nth-child(8),
+#ledger tbody td:nth-child(9),
+#ledger tbody td:nth-child(10),
+#ledger tbody td:nth-child(11) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+#ledger tbody td:nth-child(8) {
+  text-align: center;
+}
+
+#ledger a {
+  color: #2f5bd3;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#ledger a:hover {
+  text-decoration: underline;
+}
+
+#ledger .muted {
+  color: #777;
+  font-size: 13px;
+}
+
+#ledger-search::placeholder {
+  color: #8a8a8a;
+}
+
 /* =========================
    JOURNAL ENTRY PROFESSIONAL STYLE
 ========================= */
@@ -514,16 +622,17 @@ Apply
 
   <!-- ========================= LEDGER ========================= -->
   
-  <section id="ledger" style="display:none;">
+  <section id="ledger" style="display:none; margin-top:18px;">
     <h2>General Ledger</h2>
 
-    <div style="margin: 8px 0;">
-  <label for="ledger-search"><b>Search account:</b></label>
+  <div style="margin: 10px 0 6px 0;">
+  <label for="ledger-search" style="font-size:16px; font-weight:600; margin-right:8px;">
+    Search account:
+  </label>
   <input
     id="ledger-search"
     type="text"
     placeholder="Type code or name (e.g. 1001, cash, bank)..."
-    style="width: 320px; padding: 6px;"
     oninput="filterLedgerAccounts()"
   />
 </div>
