@@ -259,6 +259,43 @@ async function loadLinesFromDb() {
   }
 }
 
+async function sbFetchJournalEntryById(id) {
+  if (!currentUser) return null;
+
+  const { data, error } = await sb
+    .from("journal_entries")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", currentUser.id)
+    .single();
+
+  if (error) {
+    console.error("Entry by ID fetch error:", error);
+    return null;
+  }
+
+  return data;
+}
+
+async function sbFetchJournalLinesByJournalId(journal_id) {
+  if (!currentUser) return [];
+
+  const { data, error } = await sb
+    .from("journal_lines")
+    .select("*")
+    .eq("journal_id", journal_id)
+    .eq("user_id", currentUser.id)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Lines by journal_id fetch error:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
 // ==============================
 // COA indexing + line account resolver
 // ==============================
@@ -1507,17 +1544,6 @@ if (window.location.hash === "#ledger" || acctFromUrl) {
 
   renderLedger();
 }
-
-// if coming back from edit page, force ledger and restore account from URL
-if (window.location.hash === "#ledger" || acctFromUrl) {
-  show("ledger");
-
-  if ($("ledger-account")) {
-    $("ledger-account").value = acctFromUrl || savedLedgerAccount || "";
-  }
-
-  renderLedger();
-}
 } // ✅ THIS closes initAppAfterLogin()
 
 // ==============================
@@ -1696,43 +1722,6 @@ if (isEditPage) {
   // IMPORTANT: this must match your edit.html tbody id
   // Your renderEditLines currently uses: "edit-lines-body"
   renderEditLines(jLines);
-}
-
-  async function sbFetchJournalEntryById(id) {
-  if (!currentUser) return null;
-
-  const { data, error } = await sb
-    .from("journal_entries")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", currentUser.id)
-    .single();
-
-  if (error) {
-    console.error("Entry by ID fetch error:", error);
-    return null;
-  }
-
-  return data;
-}
-
-async function sbFetchJournalLinesByJournalId(journal_id) {
-  if (!currentUser) return [];
-
-  const { data, error } = await sb
-    .from("journal_lines")
-    .select("*")
-    .eq("journal_id", journal_id)
-    .eq("user_id", currentUser.id)
-    .eq("is_deleted", false)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error("Lines by journal_id fetch error:", error);
-    return [];
-  }
-
-  return data || [];
 }
   
 })();
