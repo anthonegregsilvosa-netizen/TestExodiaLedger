@@ -1523,17 +1523,27 @@ const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
 const acctFromUrl = getQueryParam("account_id");
 const savedLedgerAccount = localStorage.getItem(LEDGER_ACCOUNT_KEY) || "";
 
-// restore last opened page first
-show(lastView);
+// if coming back from edit page, go to ledger
+if (window.location.hash === "#ledger" || acctFromUrl) {
+  show("ledger");
 
-// if the last page was ledger, restore the selected account too
-if (lastView === "ledger" && $("ledger-account")) {
-  if (savedLedgerAccount) {
-    $("ledger-account").value = savedLedgerAccount;
+  if ($("ledger-account")) {
+    $("ledger-account").value = acctFromUrl || savedLedgerAccount || "";
   }
-  renderLedger();
-}
 
+  renderLedger();
+
+  // clean the URL so next refresh uses saved page normally
+  window.history.replaceState({}, document.title, window.location.pathname);
+} else {
+  show(lastView);
+
+  if (lastView === "ledger" && $("ledger-account")) {
+    $("ledger-account").value = savedLedgerAccount || "";
+    renderLedger();
+  }
+}
+  
 // if coming back from edit page, force ledger and restore account from URL
 if (window.location.hash === "#ledger" || acctFromUrl) {
   show("ledger");
