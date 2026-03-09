@@ -10,6 +10,7 @@ const LEDGER_ACCOUNT_KEY = "exodiaLedger.ledgerAccount.v1";
 const JOURNAL_VIEW_KEY = "exodiaLedger.journalView.v1";
 const FILTER_FROM_KEY = "exodiaLedger.filterFrom.v1";
 const FILTER_TO_KEY = "exodiaLedger.filterTo.v1";
+const WORKSHEET_VIEW_KEY = "exodiaLedger.worksheetView.v1";
 
 // ==============================
 // Supabase Setup
@@ -637,7 +638,6 @@ window.showJournal = function (which) {
   if (entry) entry.style.display = (which === "entry") ? "block" : "none";
   if (hist) hist.style.display = (which === "history") ? "block" : "none";
 
-  // hide date range on Journal Entry, show on Journal History
   if (dateBar) dateBar.style.display = (which === "history") ? "flex" : "none";
 
   if (which === "entry") {
@@ -652,6 +652,8 @@ window.showJournal = function (which) {
 };
 
 window.showWorksheet = function (view) {
+  localStorage.setItem(WORKSHEET_VIEW_KEY, view);
+
   const trial = $("ws-trial");
   const pl = $("ws-pl");
   const sfp = $("ws-sfp");
@@ -660,7 +662,7 @@ window.showWorksheet = function (view) {
   if (pl) pl.style.display = (view === "pl") ? "block" : "none";
   if (sfp) sfp.style.display = (view === "sfp") ? "block" : "none";
 
-  if (view === "trial") showWorksheet("trial");
+  if (view === "trial") renderTrialBalance();
   if (view === "pl") renderProfitAndLoss();
   if (view === "sfp") renderStatementOfFinancialPosition();
 };
@@ -669,30 +671,25 @@ window.showWorksheet = function (view) {
 // Tabs
 // ==============================
 window.show = function (view) {
-  // treat "journal-history" as a sub-view inside journal
   if (view === "journal-history") view = "journal";
 
   localStorage.setItem(LAST_VIEW_KEY, view);
 
-  // Main sections only
   ["coa", "journal", "ledger", "trial"].forEach((v) => {
     const el = $(v);
     if (!el) return;
     el.style.display = v === view ? "block" : "none";
   });
 
-  // Always hide journal-history unless journal sub-tab says "history"
   const hist = $("journal-history");
   if (hist) hist.style.display = "none";
 
-  // Toolbars
   const coaTb = $("coa-toolbar");
   if (coaTb) coaTb.style.display = (view === "coa") ? "block" : "none";
 
   const journalTb = $("journal-toolbar");
   if (journalTb) journalTb.style.display = (view === "journal") ? "block" : "none";
 
-    // Show date range on reports/history, hide on Journal Entry
   const dateBar = $("date-range-bar");
   const journalMode = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
 
@@ -702,16 +699,18 @@ window.show = function (view) {
     if (dateBar) dateBar.style.display = "flex";
   }
 
-  // Render main views + journal sub-view
   if (view === "coa") renderCOA();
   if (view === "ledger") renderLedger();
-  if (view === "trial") showWorksheet("trial");
+
+  if (view === "trial") {
+    const savedWorksheetView = localStorage.getItem(WORKSHEET_VIEW_KEY) || "trial";
+    showWorksheet(savedWorksheetView);
+  }
 
   if (view === "journal") {
-    // default: restore last journal sub-tab or show entry
-    const saved = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
-  showJournal(saved);
-}
+    const savedJournalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+    showJournal(savedJournalView);
+  }
 };
 
 // ==============================
@@ -1493,18 +1492,29 @@ if ($("filter-to")) $("filter-to").value = savedTo;
 
 const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
 const acctFromUrl = getQueryParam("account_id");
+const savedLedgerAccount = localStorage.getItem(LEDGER_ACCOUNT_KEY) || "";
 
-// restore last page after refresh
+// restore last opened page first
 show(lastView);
 
-// if URL says ledger, force ledger and restore selected account
+// if the last page was ledger, restore the selected account too
+if (lastView === "ledger" && $("ledger-account")) {
+  if (savedLedgerAccount) {
+    $("ledger-account").value = savedLedgerAccount;
+  }
+  renderLedger();
+}
+
+// if coming back from edit page, force ledger and restore account from URL
 if (window.location.hash === "#ledger" || acctFromUrl) {
   show("ledger");
 
-  if (acctFromUrl && $("ledger-account")) {
-    $("ledger-account").value = acctFromUrl;
-    renderLedger();
+  if ($("ledger-account")) {
+    $("ledger-account").value = acctFromUrl || savedLedgerAccount || "";
   }
+
+  renderLedger();
+}
 }
 } // ✅ THIS closes initAppAfterLogin()
 
