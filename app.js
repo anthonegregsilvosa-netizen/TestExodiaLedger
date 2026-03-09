@@ -1491,19 +1491,20 @@ if ($("filter-to")) $("filter-to").value = savedTo;
 
   applyDateRangeFilter();
 
-  const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+const acctFromUrl = getQueryParam("account_id");
 
-// If coming back from edit page, open ledger and auto-select account
-if (window.location.hash === "#ledger") {
+// restore last page after refresh
+show(lastView);
+
+// if URL says ledger, force ledger and restore selected account
+if (window.location.hash === "#ledger" || acctFromUrl) {
   show("ledger");
 
-  const acctFromUrl = getQueryParam("account_id");
   if (acctFromUrl && $("ledger-account")) {
     $("ledger-account").value = acctFromUrl;
     renderLedger();
   }
-} else {
-  show(lastView);
 }
 } // ✅ THIS closes initAppAfterLogin()
 
