@@ -703,14 +703,14 @@ window.show = function (view) {
   if (view === "ledger") renderLedger();
 
   if (view === "trial") {
-    const savedWorksheetView = localStorage.getItem(WORKSHEET_VIEW_KEY) || "trial";
-    showWorksheet(savedWorksheetView);
-  }
+  const savedWorksheetView = localStorage.getItem(WORKSHEET_VIEW_KEY) || "trial";
+  showWorksheet(savedWorksheetView);
+}
 
-  if (view === "journal") {
-    const savedJournalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
-    showJournal(savedJournalView);
-  }
+if (view === "journal") {
+  const savedJournalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+  showJournal(savedJournalView);
+}
 };
 
 // ==============================
@@ -990,7 +990,7 @@ function renderCOA() {
   tbody.innerHTML = "";
   const balances = computeBalances();
 
-    const totalsByType = {
+  const totalsByType = {
     Asset: 0,
     Liability: 0,
     Equity: 0,
@@ -1027,31 +1027,32 @@ function renderCOA() {
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
 
- list.forEach((a) => {
-  const bal = balances[a.id] || 0;
+  list.forEach((a) => {
+    const bal = balances[a.id] || 0;
 
-  const tr = document.createElement("tr");
-tr.innerHTML = `
-  <td>${esc(a.code)}</td>
-  <td>${esc(a.name)}</td>
-  <td>${esc(a.type)}</td>
-  <td>${esc(a.normal)}</td>
-  <td style="text-align:right;">${money(bal)}</td>
-  <td style="position:relative; text-align:right;">
-    <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}', event)">⋯</button>
-    <div class="coa-menu" data-coa-menu="${a.id}">
-      <button onclick="editAccountPrompt('${a.id}')">✏️ Edit name</button>
-      <button class="danger" onclick="deleteCOAAccount('${a.id}')">🗑 Delete</button>
-    </div>
-  </td>
-`;
-   
-if (list.length === 0) {
-  const tr = document.createElement("tr");
-  tr.innerHTML = `<td colspan="6">No accounts found for this filter.</td>`;
-  tbody.appendChild(tr);
-}
-  
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(a.code)}</td>
+      <td>${esc(a.name)}</td>
+      <td>${esc(a.type)}</td>
+      <td>${esc(a.normal)}</td>
+      <td style="text-align:right;">${money(bal)}</td>
+      <td style="position:relative; text-align:right;">
+        <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}', event)">⋯</button>
+        <div class="coa-menu" data-coa-menu="${a.id}">
+          <button onclick="editAccountPrompt('${a.id}')">✏️ Edit name</button>
+          <button class="danger" onclick="deleteCOAAccount('${a.id}')">🗑 Delete</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (list.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="6">No accounts found for this filter.</td>`;
+    tbody.appendChild(tr);
+  }
 }
 
 // ==============================
@@ -1506,6 +1507,17 @@ if (window.location.hash === "#ledger" || acctFromUrl) {
 
   renderLedger();
 }
+
+// if coming back from edit page, force ledger and restore account from URL
+if (window.location.hash === "#ledger" || acctFromUrl) {
+  show("ledger");
+
+  if ($("ledger-account")) {
+    $("ledger-account").value = acctFromUrl || savedLedgerAccount || "";
+  }
+
+  renderLedger();
+}
 } // ✅ THIS closes initAppAfterLogin()
 
 // ==============================
@@ -1684,6 +1696,43 @@ if (isEditPage) {
   // IMPORTANT: this must match your edit.html tbody id
   // Your renderEditLines currently uses: "edit-lines-body"
   renderEditLines(jLines);
+}
+
+  async function sbFetchJournalEntryById(id) {
+  if (!currentUser) return null;
+
+  const { data, error } = await sb
+    .from("journal_entries")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", currentUser.id)
+    .single();
+
+  if (error) {
+    console.error("Entry by ID fetch error:", error);
+    return null;
+  }
+
+  return data;
+}
+
+async function sbFetchJournalLinesByJournalId(journal_id) {
+  if (!currentUser) return [];
+
+  const { data, error } = await sb
+    .from("journal_lines")
+    .select("*")
+    .eq("journal_id", journal_id)
+    .eq("user_id", currentUser.id)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Lines by journal_id fetch error:", error);
+    return [];
+  }
+
+  return data || [];
 }
   
 })();
