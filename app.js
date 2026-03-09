@@ -710,8 +710,8 @@ window.show = function (view) {
   if (view === "journal") {
     // default: restore last journal sub-tab or show entry
     const saved = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
-    showJournal(saved);
-  }
+  showJournal(saved);
+}
 };
 
 // ==============================
