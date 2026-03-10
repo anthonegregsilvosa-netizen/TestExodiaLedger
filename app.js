@@ -1976,13 +1976,17 @@ window.saveAddCoaModal = async function () {
   const name = $("addcoa-name").value.trim();
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
-const exists = COA.some(
-  a => !a.is_deleted && String(a.code).trim() === code
-);
-if (exists) {
-  $("addcoa-msg").textContent = `Code ${code} already exists. Try ${getNextAccountCode()} instead.`;
-  return;
+let finalCode = code;
+
+while (COA.some(a => !a.is_deleted && String(a.code).trim() === finalCode)) {
+  finalCode = String(Number(finalCode) + 1);
 }
+
+if (finalCode !== code) {
+  $("addcoa-msg").textContent =
+    `Code ${code} already exists. Using ${finalCode} instead.`;
+}
+
 
   if (!code || !name) {
     $("addcoa-msg").textContent = "Code and Name are required.";
@@ -1991,14 +1995,14 @@ if (exists) {
 
   try {
     await sbInsertCOA({
-      user_id: currentUser.id,
-      code,
-      name,
-      type,
-      normal,
-      is_deleted: false,
-    });
-
+  user_id: currentUser.id,
+  code: finalCode,
+  name,
+  type,
+  normal,
+  is_deleted: false,
+});
+    
     COA = await sbFetchCOA();
     renderCOA();
     closeAddCoaModal();
