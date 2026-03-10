@@ -1950,7 +1950,7 @@ window.addAccountPopup = async function () {
 
 window.openAddCoaModal = function () {
   $("addcoa-modal").style.display = "grid";
-  $("addcoa-code").value = getNextAccountCode();   // ✅ auto next
+  $("addcoa-code").value = getNextAccountCode();
   $("addcoa-name").value = "";
   $("addcoa-type").value = "Asset";
   $("addcoa-normal").value = "Debit";
@@ -1968,11 +1968,6 @@ window.saveAddCoaModal = async function () {
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
 
-  if (!code || !name) {
-    $("addcoa-msg").textContent = "Code and Name are required.";
-    return;
-  }
-
   let finalCode = code;
 
   while (COA.some(a => !a.is_deleted && String(a.code).trim() === finalCode)) {
@@ -1986,8 +1981,13 @@ window.saveAddCoaModal = async function () {
     $("addcoa-msg").textContent = "";
   }
 
+  if (!code || !name) {
+    $("addcoa-msg").textContent = "Code and Name are required.";
+    return;
+  }
+
   try {
-    await sbInsertCOA({
+    const inserted = await sbInsertCOA({
       user_id: currentUser.id,
       code: finalCode,
       name,
@@ -1996,6 +1996,8 @@ window.saveAddCoaModal = async function () {
       is_deleted: false,
     });
 
+    console.log("Inserted COA:", inserted);
+
     COA = await sbFetchCOA();
     refreshCoaDatalist();
     resolveLinesAccountIds();
@@ -2003,17 +2005,22 @@ window.saveAddCoaModal = async function () {
     const ledgerSel = $("ledger-account");
     if (ledgerSel) ledgerSel.innerHTML = "";
 
+    currentCOAType = "All";
     renderCOA();
     renderLedger();
     renderTrialBalance();
+
     closeAddCoaModal();
   } catch (e) {
-    console.error(e);
+    console.error("saveAddCoaModal error:", e);
+
     if (e?.code === "23505") {
       $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
       return;
     }
-    $("addcoa-msg").textContent = "Failed to add account. Check your connection/policies.";
+
+    $("addcoa-msg").textContent =
+      e?.message || "Failed to add account. Check your connection/policies.";
   }
 };
 
