@@ -1967,28 +1967,24 @@ window.saveAddCoaModal = async function () {
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
 
-  let finalCode = code;
-
-  while (COA.some(a => !a.is_deleted && String(a.code).trim() === finalCode)) {
-    finalCode = String(Number(finalCode) + 1);
-  }
-
-  if (finalCode !== code) {
-    $("addcoa-msg").textContent =
-      `Code ${code} already exists. Using ${finalCode} instead.`;
-  } else {
-    $("addcoa-msg").textContent = "";
-  }
-
   if (!code || !name) {
     $("addcoa-msg").textContent = "Code and Name are required.";
+    return;
+  }
+
+  const exists = COA.some(
+    (a) => !a.is_deleted && String(a.code).trim() === code
+  );
+
+  if (exists) {
+    $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
     return;
   }
 
   try {
     const inserted = await sbInsertCOA({
       user_id: currentUser.id,
-      code: finalCode,
+      code,
       name,
       type,
       normal,
@@ -2010,6 +2006,7 @@ window.saveAddCoaModal = async function () {
     renderTrialBalance();
 
     closeAddCoaModal();
+    alert(`✅ Account added: ${code} - ${name}`);
   } catch (e) {
     console.error("saveAddCoaModal error:", e);
 
