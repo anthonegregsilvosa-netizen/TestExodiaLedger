@@ -1976,7 +1976,9 @@ window.saveAddCoaModal = async function () {
   const name = $("addcoa-name").value.trim();
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
-const exists = COA.some(a => String(a.code).trim() === code);
+const exists = COA.some(
+  a => !a.is_deleted && String(a.code).trim() === code
+);
 if (exists) {
   $("addcoa-msg").textContent = `Code ${code} already exists. Try ${getNextAccountCode()} instead.`;
   return;
