@@ -779,7 +779,6 @@ if (ledgerSel) ledgerSel.innerHTML = "";
 renderCOA();
 renderLedger();
 renderTrialBalance();
-closeAddCoaModal();
     
     alert("✅ Account updated!");
   } catch (e) {
