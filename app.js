@@ -770,16 +770,17 @@ window.editAccountPrompt = async function editAccountPrompt(accountId) {
     await sbUpdateCOA(accountId, { name: newName, updated_at: new Date().toISOString() });
 
     COA = await sbFetchCOA();
-    refreshCoaDatalist();
-    resolveLinesAccountIds();
+refreshCoaDatalist();
+resolveLinesAccountIds();
 
-    const ledgerSel = $("ledger-account");
-    if (ledgerSel) ledgerSel.innerHTML = "";
+const ledgerSel = $("ledger-account");
+if (ledgerSel) ledgerSel.innerHTML = "";
 
-    renderCOA();
-    renderLedger();
-    renderTrialBalance();
-
+renderCOA();
+renderLedger();
+renderTrialBalance();
+closeAddCoaModal();
+    
     alert("✅ Account updated!");
   } catch (e) {
     console.error(e);
@@ -1544,16 +1545,6 @@ if (window.location.hash === "#ledger" || acctFromUrl) {
   }
 }
   
-// if coming back from edit page, force ledger and restore account from URL
-if (window.location.hash === "#ledger" || acctFromUrl) {
-  show("ledger");
-
-  if ($("ledger-account")) {
-    $("ledger-account").value = acctFromUrl || savedLedgerAccount || "";
-  }
-
-  renderLedger();
-}
 } // ✅ THIS closes initAppAfterLogin()
 
 // ==============================
@@ -1976,49 +1967,59 @@ window.saveAddCoaModal = async function () {
   const name = $("addcoa-name").value.trim();
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
-let finalCode = code;
-
-while (COA.some(a => !a.is_deleted && String(a.code).trim() === finalCode)) {
-  finalCode = String(Number(finalCode) + 1);
-}
-
-if (finalCode !== code) {
-  $("addcoa-msg").textContent =
-    `Code ${code} already exists. Using ${finalCode} instead.`;
-}
-
 
   if (!code || !name) {
     $("addcoa-msg").textContent = "Code and Name are required.";
     return;
   }
 
+  let finalCode = code;
+
+  while (COA.some(a => !a.is_deleted && String(a.code).trim() === finalCode)) {
+    finalCode = String(Number(finalCode) + 1);
+  }
+
+  if (finalCode !== code) {
+    $("addcoa-msg").textContent =
+      `Code ${code} already exists. Using ${finalCode} instead.`;
+  } else {
+    $("addcoa-msg").textContent = "";
+  }
+
   try {
     await sbInsertCOA({
-  user_id: currentUser.id,
-  code: finalCode,
-  name,
-  type,
-  normal,
-  is_deleted: false,
-});
-    
+      user_id: currentUser.id,
+      code: finalCode,
+      name,
+      type,
+      normal,
+      is_deleted: false,
+    });
+
     COA = await sbFetchCOA();
+    refreshCoaDatalist();
+    resolveLinesAccountIds();
+
+    const ledgerSel = $("ledger-account");
+    if (ledgerSel) ledgerSel.innerHTML = "";
+
     renderCOA();
+    renderLedger();
+    renderTrialBalance();
     closeAddCoaModal();
   } catch (e) {
-  console.error(e);
-  // supabase error code 23505 = duplicate
-  if (e?.code === "23505") {
-    $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
-    return;
+    console.error(e);
+    if (e?.code === "23505") {
+      $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
+      return;
+    }
+    $("addcoa-msg").textContent = "Failed to add account. Check your connection/policies.";
   }
-  $("addcoa-msg").textContent = "Failed to add account. Check your connection/policies.";
-}
 };
 
 function getNextAccountCode() {
   const codes = (COA || [])
+    .filter(a => !a.is_deleted)
     .map(a => Number(String(a.code || "").replace(/[^0-9]/g, "")))
     .filter(n => Number.isFinite(n));
 
