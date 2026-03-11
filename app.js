@@ -1234,6 +1234,75 @@ function computeBalances() {
 // ==============================
 // Trial Balance
 // ==============================
+
+function renderTrialBalance() {
+  const tbody = $("tb-body");
+  const tdTotal = $("tb-total-debit");
+  const tcTotal = $("tb-total-credit");
+  const status = $("tb-status");
+
+  if (!tbody || !tdTotal || !tcTotal) return;
+
+  tbody.innerHTML = "";
+  if (status) status.textContent = "";
+
+  const balances = computeBalances();
+
+  const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
+
+  const list = [...COA].sort((a, b) => {
+    const ta = typeOrder[a.type] ?? 99;
+    const tb = typeOrder[b.type] ?? 99;
+    if (ta !== tb) return ta - tb;
+
+    const ca = codeNum(a.code);
+    const cb = codeNum(b.code);
+    if (ca !== cb) return ca - cb;
+
+    return String(a.name || "").localeCompare(String(b.name || ""));
+  });
+
+  let totalDebit = 0;
+  let totalCredit = 0;
+
+  list.forEach((a) => {
+    const bal = balances[a.id] || 0;
+
+    let debit = 0;
+    let credit = 0;
+
+    if (a.normal === "Debit") {
+      debit = Math.max(bal, 0);
+      credit = Math.max(-bal, 0);
+    } else {
+      credit = Math.max(bal, 0);
+      debit = Math.max(-bal, 0);
+    }
+
+    totalDebit += debit;
+    totalCredit += credit;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(a.code)}</td>
+      <td>${esc(a.name)}</td>
+      <td>${esc(a.type)}</td>
+      <td style="text-align:right;">${money(debit)}</td>
+      <td style="text-align:right;">${money(credit)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tdTotal.textContent = money(totalDebit);
+  tcTotal.textContent = money(totalCredit);
+
+  const diff = Math.abs(totalDebit - totalCredit);
+  if (status) {
+    status.textContent =
+      diff < 0.00001 ? "Balanced ✅" : `Not balanced ❌ (Difference: ${money(diff)})`;
+  }
+}
+
 function renderProfitAndLoss() {
   const tbody = $("pl-body");
   const netEl = $("pl-net");
@@ -1850,6 +1919,15 @@ function money(n) {
   });
 }
 
+function esc(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function isDepartmentExpenseName(name) {
   const n = String(name || "").trim();
 
@@ -1924,6 +2002,31 @@ function getDepartmentExpenseGroupName(name) {
   if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
 
   return n;
+}
+
+function getDepartmentOrder(name) {
+  const n = String(name || "").trim();
+
+  if (n === "Facilities Department Expense - General") return 1;
+  if (n === "Finance Department Expense - General") return 2;
+  if (n === "Human Resource Department Expense - General") return 3;
+  if (n === "Information Technology Department Expense - General") return 4;
+  if (n === "Marketing Department Expense - General") return 5;
+  if (n === "Operation Department Expense - General") return 6;
+  if (n === "Sales Department Expense - General") return 7;
+  if (n === "Chiefs Expense - General") return 8;
+
+  if (n.startsWith("FE - ")) return 1;
+  if (n.startsWith("Fine - ")) return 2;
+  if (n.startsWith("HRE - ")) return 3;
+  if (n.startsWith("ITE - ")) return 4;
+  if (n.startsWith("ME - ")) return 5;
+  if (n.startsWith("OpEx - ")) return 6;
+  if (n.startsWith("SE - ")) return 7;
+  if (n.startsWith("ChiE - ")) return 8;
+  if (n === "ChiE_Office_Equipment_Expense") return 8;
+
+  return 999;
 }
 
 function getDepartmentExpenseGroupOrder(name) {
