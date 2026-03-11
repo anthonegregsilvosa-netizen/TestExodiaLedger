@@ -1311,178 +1311,135 @@ function renderProfitAndLoss() {
 
   tbody.innerHTML = "";
 
-  const balances = computeBalances();
+  const expenseGroups = {};
+  const revenueGroups = {};
+
+  lines
+    .filter((l) => !l.is_deleted)
+    .filter((l) => {
+      const d = String(l.entry_date || "");
+      if (filterFrom && d < filterFrom) return false;
+      if (filterTo && d > filterTo) return false;
+      return true;
+    })
+    .forEach((l) => {
+      const accountId = l.resolvedAccountId || l.accountId;
+      const acct = COA.find((a) => a.id === accountId);
+      if (!acct) return;
+
+      const type = String(acct.type || "").trim();
+      const accountName = String(acct.name || "").trim();
+      const dept = String(l.department || "No Department").trim();
+
+      if (type === "Revenue") {
+        const amount = num(l.credit) - num(l.debit);
+
+        if (!revenueGroups[accountName]) {
+          revenueGroups[accountName] = { total: 0, departments: {} };
+        }
+
+        revenueGroups[accountName].total += amount;
+        revenueGroups[accountName].departments[dept] =
+          (revenueGroups[accountName].departments[dept] || 0) + amount;
+      }
+
+      if (type === "Expense" || type === "Expenses") {
+        const amount = num(l.debit) - num(l.credit);
+
+        if (!expenseGroups[accountName]) {
+          expenseGroups[accountName] = { total: 0, departments: {} };
+        }
+
+        expenseGroups[accountName].total += amount;
+        expenseGroups[accountName].departments[dept] =
+          (expenseGroups[accountName].departments[dept] || 0) + amount;
+      }
+    });
 
   let totalRevenue = 0;
   let totalExpense = 0;
 
-  const revenueGroups = {};
-  const expenseGroups = {};
+  const revHead = document.createElement("tr");
+  revHead.innerHTML = `<td colspan="2"><b>Revenue</b></td>`;
+  tbody.appendChild(revHead);
 
-  // build grouped totals by account + department
-  COA.forEach((a) => {
-    const bal = balances[a.id] || 0;
-    const type = String(a.type || "").trim();
-    const accountName = String(a.name || "").trim();
+  Object.keys(revenueGroups).sort().forEach((name, i) => {
+    const grp = revenueGroups[name];
+    totalRevenue += grp.total;
 
-    if (type === "Revenue") {
-      totalRevenue += bal;
+    const detailClass = `pl-rev-${i}`;
 
-      if (!revenueGroups[accountName]) {
-        revenueGroups[accountName] = {
-          total: 0,
-          departments: {}
-        };
-      }
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}')">▶</button>
+        <b>${esc(name)}</b>
+      </td>
+      <td style="text-align:right;">${money(grp.total)}</td>
+    `;
+    tbody.appendChild(tr);
 
-      revenueGroups[accountName].total += bal;
-
-      lines
-        .filter((l) => !l.is_deleted)
-        .filter((l) => (l.resolvedAccountId || l.accountId) === a.id)
-        .filter((l) => {
-          const d = String(l.entry_date || "");
-          if (filterFrom && d < filterFrom) return false;
-          if (filterTo && d > filterTo) return false;
-          return true;
-        })
-        .forEach((l) => {
-          const dept = String(l.department || "No Department").trim();
-          const amount = num(l.credit) - num(l.debit);
-
-          revenueGroups[accountName].departments[dept] =
-            (revenueGroups[accountName].departments[dept] || 0) + amount;
-        });
-    }
-
-    if (type === "Expense" || type === "Expenses") {
-      totalExpense += bal;
-
-      if (!expenseGroups[accountName]) {
-        expenseGroups[accountName] = {
-          total: 0,
-          departments: {}
-        };
-      }
-
-      expenseGroups[accountName].total += bal;
-
-      lines
-        .filter((l) => !l.is_deleted)
-        .filter((l) => (l.resolvedAccountId || l.accountId) === a.id)
-        .filter((l) => {
-          const d = String(l.entry_date || "");
-          if (filterFrom && d < filterFrom) return false;
-          if (filterTo && d > filterTo) return false;
-          return true;
-        })
-        .forEach((l) => {
-          const dept = String(l.department || "No Department").trim();
-          const amount = num(l.debit) - num(l.credit);
-
-          expenseGroups[accountName].departments[dept] =
-            (expenseGroups[accountName].departments[dept] || 0) + amount;
-        });
-    }
+    Object.keys(grp.departments).sort().forEach((dept) => {
+      const dtr = document.createElement("tr");
+      dtr.className = detailClass;
+      dtr.style.display = "none";
+      dtr.innerHTML = `
+        <td style="padding-left:40px;">${esc(dept)}</td>
+        <td style="text-align:right;">${money(grp.departments[dept])}</td>
+      `;
+      tbody.appendChild(dtr);
+    });
   });
 
-  if (Math.abs(totalRevenue) < 0.00001) totalRevenue = 0;
-  if (Math.abs(totalExpense) < 0.00001) totalExpense = 0;
-
-  const net = totalRevenue - totalExpense;
-  const finalNet = Math.abs(net) < 0.00001 ? 0 : net;
-
-  // ===== Revenue Section =====
-  const revHeader = document.createElement("tr");
-  revHeader.innerHTML = `
-    <td colspan="2" style="font-weight:bold; background:#f3f4f6;">Revenue</td>
-  `;
-  tbody.appendChild(revHeader);
-
-  Object.keys(revenueGroups)
-    .sort((a, b) => a.localeCompare(b))
-    .forEach((accountName, idx) => {
-      const group = revenueGroups[accountName];
-      const rowId = `rev-detail-${idx}`;
-
-      const tr = document.createElement("tr");
-      tr.style.cursor = "pointer";
-      tr.onclick = () => togglePLDetail(rowId);
-
-      tr.innerHTML = `
-        <td><b>▶ ${esc(accountName)}</b></td>
-        <td style="text-align:right;">${money(group.total)}</td>
-      `;
-      tbody.appendChild(tr);
-
-      Object.keys(group.departments)
-        .sort((a, b) => a.localeCompare(b))
-        .forEach((dept) => {
-          const dtr = document.createElement("tr");
-          dtr.className = rowId;
-          dtr.style.display = "none";
-          dtr.innerHTML = `
-            <td style="padding-left:30px;">${esc(dept)}</td>
-            <td style="text-align:right;">${money(group.departments[dept])}</td>
-          `;
-          tbody.appendChild(dtr);
-        });
-    });
-
-  const revTotalRow = document.createElement("tr");
-  revTotalRow.innerHTML = `
+  const revTotal = document.createElement("tr");
+  revTotal.innerHTML = `
     <td><b>Total Revenue</b></td>
     <td style="text-align:right;"><b>${money(totalRevenue)}</b></td>
   `;
-  tbody.appendChild(revTotalRow);
+  tbody.appendChild(revTotal);
 
-  // ===== Expense Section =====
-  const expHeader = document.createElement("tr");
-  expHeader.innerHTML = `
-    <td colspan="2" style="font-weight:bold; background:#f3f4f6;">Expenses</td>
-  `;
-  tbody.appendChild(expHeader);
+  const expHead = document.createElement("tr");
+  expHead.innerHTML = `<td colspan="2"><b>Expenses</b></td>`;
+  tbody.appendChild(expHead);
 
-  Object.keys(expenseGroups)
-    .sort((a, b) => a.localeCompare(b))
-    .forEach((accountName, idx) => {
-      const group = expenseGroups[accountName];
-      const rowId = `exp-detail-${idx}`;
+  Object.keys(expenseGroups).sort().forEach((name, i) => {
+    const grp = expenseGroups[name];
+    totalExpense += grp.total;
 
-      const tr = document.createElement("tr");
-      tr.style.cursor = "pointer";
-      tr.onclick = () => togglePLDetail(rowId);
+    const detailClass = `pl-exp-${i}`;
 
-      tr.innerHTML = `
-        <td><b>▶ ${esc(accountName)}</b></td>
-        <td style="text-align:right;">${money(group.total)}</td>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}')">▶</button>
+        <b>${esc(name)}</b>
+      </td>
+      <td style="text-align:right;">${money(grp.total)}</td>
+    `;
+    tbody.appendChild(tr);
+
+    Object.keys(grp.departments).sort().forEach((dept) => {
+      const dtr = document.createElement("tr");
+      dtr.className = detailClass;
+      dtr.style.display = "none";
+      dtr.innerHTML = `
+        <td style="padding-left:40px;">${esc(dept)}</td>
+        <td style="text-align:right;">${money(grp.departments[dept])}</td>
       `;
-      tbody.appendChild(tr);
-
-      Object.keys(group.departments)
-        .sort((a, b) => a.localeCompare(b))
-        .forEach((dept) => {
-          const dtr = document.createElement("tr");
-          dtr.className = rowId;
-          dtr.style.display = "none";
-          dtr.innerHTML = `
-            <td style="padding-left:30px;">${esc(dept)}</td>
-            <td style="text-align:right;">${money(group.departments[dept])}</td>
-          `;
-          tbody.appendChild(dtr);
-        });
+      tbody.appendChild(dtr);
     });
+  });
 
-  const expTotalRow = document.createElement("tr");
-  expTotalRow.innerHTML = `
+  const expTotal = document.createElement("tr");
+  expTotal.innerHTML = `
     <td><b>Total Expenses</b></td>
     <td style="text-align:right;"><b>${money(totalExpense)}</b></td>
   `;
-  tbody.appendChild(expTotalRow);
+  tbody.appendChild(expTotal);
 
-  netEl.textContent = money(finalNet);
+  const net = totalRevenue - totalExpense;
+  netEl.textContent = money(Math.abs(net) < 0.00001 ? 0 : net);
 }
-
 function renderStatementOfFinancialPosition() {
   const tbody = $("sfp-body");
   if (!tbody) return;
@@ -2108,6 +2065,13 @@ window.openAddCoaModal = function () {
 
 window.closeAddCoaModal = function () {
   $("addcoa-modal").style.display = "none";
+};
+
+window.togglePLDetail = function (className) {
+  const rows = document.querySelectorAll("." + className);
+  rows.forEach((row) => {
+    row.style.display = row.style.display === "none" ? "table-row" : "none";
+  });
 };
 
 window.saveAddCoaModal = async function () {
