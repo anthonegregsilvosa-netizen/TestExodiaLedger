@@ -1392,9 +1392,10 @@ function renderProfitAndLoss() {
 
       departmentGroups[groupName].total += acctTotal;
       departmentGroups[groupName].items.push({
-        name: rawName,
-        total: acctTotal
-      });
+  name: rawName,
+  departmentLabel: getDepartmentLabelFromAccountName(rawName),
+  total: acctTotal
+});
     } else {
       companyItems.push({
         name: rawName,
@@ -1423,33 +1424,30 @@ function renderProfitAndLoss() {
 
     const detailClass = `pl-dept-${i}`;
 
-    const parentRow = document.createElement("tr");
-    parentRow.innerHTML = `
-      <td>
-        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
-        <b>${esc(groupName)} [Overall Total]</b>
-      </td>
-      <td style="text-align:right;"><b>${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</b></td>
-    `;
-    tbody.appendChild(parentRow);
+   const parentRow = document.createElement("tr");
+parentRow.innerHTML = `
+  <td>
+    <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
+    <b>${esc(groupName)}</b>
+  </td>
+  <td style="text-align:right;"><b>${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</b></td>
+`;
+tbody.appendChild(parentRow);
 
-    grp.items
-      .sort((a, b) => {
-        const da = getDepartmentOrder(a.name);
-        const db = getDepartmentOrder(b.name);
-        if (da !== db) return da - db;
-        return a.name.localeCompare(b.name);
-      })
-      .forEach((item) => {
-        const dtr = document.createElement("tr");
-        dtr.className = detailClass;
-        dtr.style.display = "none";
-        dtr.innerHTML = `
-          <td style="padding-left:40px;">${esc(item.name)}</td>
-          <td style="text-align:right;">${money(Math.abs(item.total) < 0.00001 ? 0 : item.total)}</td>
-        `;
-        tbody.appendChild(dtr);
-      });
+grp.items
+  .sort((a, b) => {
+    return a.departmentLabel.localeCompare(b.departmentLabel);
+  })
+  .forEach((item) => {
+    const dtr = document.createElement("tr");
+    dtr.className = detailClass;
+    dtr.style.display = "none";
+    dtr.innerHTML = `
+      <td style="padding-left:40px;">${esc(item.departmentLabel)}</td>
+      <td style="text-align:right;">${money(Math.abs(item.total) < 0.00001 ? 0 : item.total)}</td>
+    `;
+    tbody.appendChild(dtr);
+  });
   });
 
   // -----------------------------
@@ -2002,6 +2000,31 @@ function getDepartmentExpenseGroupName(name) {
   if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
 
   return n;
+}
+
+function getDepartmentLabelFromAccountName(name) {
+  const n = String(name || "").trim();
+
+  if (n === "Facilities Department Expense - General") return "Facilities";
+  if (n === "Finance Department Expense - General") return "Finance";
+  if (n === "Human Resource Department Expense - General") return "Human Resource";
+  if (n === "Information Technology Department Expense - General") return "Information Technology";
+  if (n === "Marketing Department Expense - General") return "Marketing";
+  if (n === "Operation Department Expense - General") return "Operation";
+  if (n === "Sales Department Expense - General") return "Sales";
+  if (n === "Chiefs Expense - General") return "Chiefs";
+
+  if (n.startsWith("FE - ")) return "Facilities";
+  if (n.startsWith("Fine - ")) return "Finance";
+  if (n.startsWith("HRE - ")) return "Human Resource";
+  if (n.startsWith("ITE - ")) return "Information Technology";
+  if (n.startsWith("ME - ")) return "Marketing";
+  if (n.startsWith("OpEx - ")) return "Operation";
+  if (n.startsWith("SE - ")) return "Sales";
+  if (n.startsWith("ChiE - ")) return "Chiefs";
+  if (n === "ChiE_Office_Equipment_Expense") return "Chiefs";
+
+  return "Unknown Department";
 }
 
 function getDepartmentOrder(name) {
