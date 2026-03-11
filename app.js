@@ -4,8 +4,6 @@
 // Local UI memory keys
 // ==============================
 const LAST_VIEW_KEY = "exodiaLedger.lastView.v1";
-const FILTER_YEAR_KEY = "exodiaLedger.filterYear.v1";
-const FILTER_MONTH_KEY = "exodiaLedger.filterMonth.v1";
 const LEDGER_ACCOUNT_KEY = "exodiaLedger.ledgerAccount.v1";
 const JOURNAL_VIEW_KEY = "exodiaLedger.journalView.v1";
 const FILTER_FROM_KEY = "exodiaLedger.filterFrom.v1";
@@ -1304,6 +1302,17 @@ function renderTrialBalance() {
   }
 }
 
+const PL_DEPARTMENTS = [
+  "Facilities",
+  "Finance",
+  "HR",
+  "IT",
+  "Marketing",
+  "Operations",
+  "Sales",
+  "Chiefs"
+];
+
 function renderProfitAndLoss() {
   const tbody = $("pl-body");
   const netEl = $("pl-net");
@@ -1311,60 +1320,113 @@ function renderProfitAndLoss() {
 
   tbody.innerHTML = "";
 
-  const expenseGroups = {};
-  const revenueGroups = {};
-
-  lines
+  // date-filtered lines only
+  const filteredLines = lines
     .filter((l) => !l.is_deleted)
     .filter((l) => {
       const d = String(l.entry_date || "");
       if (filterFrom && d < filterFrom) return false;
       if (filterTo && d > filterTo) return false;
       return true;
-    })
-    .forEach((l) => {
-      const accountId = l.resolvedAccountId || l.accountId;
-      const acct = COA.find((a) => a.id === accountId);
-      if (!acct) return;
-
-      const type = String(acct.type || "").trim();
-      const accountName = String(acct.name || "").trim();
-      const dept = String(l.department || "No Department").trim();
-
-      if (type === "Revenue") {
-        const amount = num(l.credit) - num(l.debit);
-
-        if (!revenueGroups[accountName]) {
-          revenueGroups[accountName] = { total: 0, departments: {} };
-        }
-
-        revenueGroups[accountName].total += amount;
-        revenueGroups[accountName].departments[dept] =
-          (revenueGroups[accountName].departments[dept] || 0) + amount;
-      }
-
-      if (type === "Expense" || type === "Expenses") {
-        const amount = num(l.debit) - num(l.credit);
-
-        if (!expenseGroups[accountName]) {
-          expenseGroups[accountName] = { total: 0, departments: {} };
-        }
-
-        expenseGroups[accountName].total += amount;
-        expenseGroups[accountName].departments[dept] =
-          (expenseGroups[accountName].departments[dept] || 0) + amount;
-      }
     });
+
+  // -----------------------------
+  // REVENUE GROUPS
+  // -----------------------------
+  const revenueAccounts = COA
+    .filter((a) => String(a.type || "").trim() === "Revenue")
+    .sort((a, b) => {
+      const ca = codeNum(a.code);
+      const cb = codeNum(b.code);
+      if (ca !== cb) return ca - cb;
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
+  const revenueGroups = {};
+  revenueAccounts.forEach((acct) => {
+    revenueGroups[acct.id] = {
+      code: acct.code || "",
+      name: acct.name || "",
+      total: 0,
+      departments: {}
+    };
+
+    PL_DEPARTMENTS.forEach((dept) => {
+      revenueGroups[acct.id].departments[dept] = 0;
+    });
+    revenueGroups[acct.id].departments["No Department"] = 0;
+  });
+
+  filteredLines.forEach((l) => {
+    const accountId = l.resolvedAccountId || l.accountId;
+    const grp = revenueGroups[accountId];
+    if (!grp) return;
+
+    const dept = String(l.department || "No Department").trim() || "No Department";
+    const amount = num(l.credit) - num(l.debit);
+
+    grp.total += amount;
+
+    if (grp.departments[dept] == null) grp.departments[dept] = 0;
+    grp.departments[dept] += amount;
+  });
+
+  // -----------------------------
+  // EXPENSE GROUPS
+  // -----------------------------
+  const expenseAccounts = COA
+    .filter((a) => {
+      const t = String(a.type || "").trim();
+      return t === "Expense" || t === "Expenses";
+    })
+    .sort((a, b) => {
+      const ca = codeNum(a.code);
+      const cb = codeNum(b.code);
+      if (ca !== cb) return ca - cb;
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
+  const expenseGroups = {};
+  expenseAccounts.forEach((acct) => {
+    expenseGroups[acct.id] = {
+      code: acct.code || "",
+      name: acct.name || "",
+      total: 0,
+      departments: {}
+    };
+
+    PL_DEPARTMENTS.forEach((dept) => {
+      expenseGroups[acct.id].departments[dept] = 0;
+    });
+    expenseGroups[acct.id].departments["No Department"] = 0;
+  });
+
+  filteredLines.forEach((l) => {
+    const accountId = l.resolvedAccountId || l.accountId;
+    const grp = expenseGroups[accountId];
+    if (!grp) return;
+
+    const dept = String(l.department || "No Department").trim() || "No Department";
+    const amount = num(l.debit) - num(l.credit);
+
+    grp.total += amount;
+
+    if (grp.departments[dept] == null) grp.departments[dept] = 0;
+    grp.departments[dept] += amount;
+  });
 
   let totalRevenue = 0;
   let totalExpense = 0;
 
+  // -----------------------------
+  // RENDER REVENUE
+  // -----------------------------
   const revHead = document.createElement("tr");
   revHead.innerHTML = `<td colspan="2"><b>Revenue</b></td>`;
   tbody.appendChild(revHead);
 
-  Object.keys(revenueGroups).sort().forEach((name, i) => {
-    const grp = revenueGroups[name];
+  revenueAccounts.forEach((acct, i) => {
+    const grp = revenueGroups[acct.id];
     totalRevenue += grp.total;
 
     const detailClass = `pl-rev-${i}`;
@@ -1372,20 +1434,21 @@ function renderProfitAndLoss() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}')">▶</button>
-        <b>${esc(name)}</b>
+        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
+        <b>${esc(grp.name)} [Overall Total]</b>
       </td>
-      <td style="text-align:right;">${money(grp.total)}</td>
+      <td style="text-align:right;">${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</td>
     `;
     tbody.appendChild(tr);
 
-    Object.keys(grp.departments).sort().forEach((dept) => {
+    const revenueDeptOrder = [...PL_DEPARTMENTS, "No Department"];
+    revenueDeptOrder.forEach((dept) => {
       const dtr = document.createElement("tr");
       dtr.className = detailClass;
       dtr.style.display = "none";
       dtr.innerHTML = `
         <td style="padding-left:40px;">${esc(dept)}</td>
-        <td style="text-align:right;">${money(grp.departments[dept])}</td>
+        <td style="text-align:right;">${money(Math.abs(grp.departments[dept] || 0) < 0.00001 ? 0 : grp.departments[dept] || 0)}</td>
       `;
       tbody.appendChild(dtr);
     });
@@ -1394,16 +1457,19 @@ function renderProfitAndLoss() {
   const revTotal = document.createElement("tr");
   revTotal.innerHTML = `
     <td><b>Total Revenue</b></td>
-    <td style="text-align:right;"><b>${money(totalRevenue)}</b></td>
+    <td style="text-align:right;"><b>${money(Math.abs(totalRevenue) < 0.00001 ? 0 : totalRevenue)}</b></td>
   `;
   tbody.appendChild(revTotal);
 
+  // -----------------------------
+  // RENDER EXPENSES
+  // -----------------------------
   const expHead = document.createElement("tr");
   expHead.innerHTML = `<td colspan="2"><b>Expenses</b></td>`;
   tbody.appendChild(expHead);
 
-  Object.keys(expenseGroups).sort().forEach((name, i) => {
-    const grp = expenseGroups[name];
+  expenseAccounts.forEach((acct, i) => {
+    const grp = expenseGroups[acct.id];
     totalExpense += grp.total;
 
     const detailClass = `pl-exp-${i}`;
@@ -1411,20 +1477,21 @@ function renderProfitAndLoss() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}')">▶</button>
-        <b>${esc(name)}</b>
+        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
+        <b>${esc(grp.name)} [Overall Total]</b>
       </td>
-      <td style="text-align:right;">${money(grp.total)}</td>
+      <td style="text-align:right;">${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</td>
     `;
     tbody.appendChild(tr);
 
-    Object.keys(grp.departments).sort().forEach((dept) => {
+    const expenseDeptOrder = [...PL_DEPARTMENTS, "No Department"];
+    expenseDeptOrder.forEach((dept) => {
       const dtr = document.createElement("tr");
       dtr.className = detailClass;
       dtr.style.display = "none";
       dtr.innerHTML = `
         <td style="padding-left:40px;">${esc(dept)}</td>
-        <td style="text-align:right;">${money(grp.departments[dept])}</td>
+        <td style="text-align:right;">${money(Math.abs(grp.departments[dept] || 0) < 0.00001 ? 0 : grp.departments[dept] || 0)}</td>
       `;
       tbody.appendChild(dtr);
     });
@@ -1433,13 +1500,14 @@ function renderProfitAndLoss() {
   const expTotal = document.createElement("tr");
   expTotal.innerHTML = `
     <td><b>Total Expenses</b></td>
-    <td style="text-align:right;"><b>${money(totalExpense)}</b></td>
+    <td style="text-align:right;"><b>${money(Math.abs(totalExpense) < 0.00001 ? 0 : totalExpense)}</b></td>
   `;
   tbody.appendChild(expTotal);
 
   const net = totalRevenue - totalExpense;
   netEl.textContent = money(Math.abs(net) < 0.00001 ? 0 : net);
 }
+
 function renderStatementOfFinancialPosition() {
   const tbody = $("sfp-body");
   if (!tbody) return;
@@ -1878,12 +1946,6 @@ function esc(s) {
     .replaceAll("'", "&#039;");
 }
 
-function togglePLDetail(className) {
-  document.querySelectorAll("." + className).forEach((row) => {
-    row.style.display = row.style.display === "none" ? "table-row" : "none";
-  });
-}
-
 // ✅ Live red-border validation for required fields
 ["je-date", "je-refno", "je-description"].forEach((id) => {
   $(id)?.addEventListener("input", () => {
@@ -2067,11 +2129,21 @@ window.closeAddCoaModal = function () {
   $("addcoa-modal").style.display = "none";
 };
 
-window.togglePLDetail = function (className) {
+window.togglePLDetail = function (className, btn) {
   const rows = document.querySelectorAll("." + className);
+  let isOpening = false;
+
   rows.forEach((row) => {
-    row.style.display = row.style.display === "none" ? "table-row" : "none";
+    if (row.style.display === "none") isOpening = true;
   });
+
+  rows.forEach((row) => {
+    row.style.display = isOpening ? "table-row" : "none";
+  });
+
+  if (btn) {
+    btn.textContent = isOpening ? "▼" : "▶";
+  }
 };
 
 window.saveAddCoaModal = async function () {
