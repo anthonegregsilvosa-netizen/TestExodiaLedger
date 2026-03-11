@@ -1234,85 +1234,6 @@ function computeBalances() {
 // ==============================
 // Trial Balance
 // ==============================
-function renderTrialBalance() {
-  const tbody = $("tb-body");
-  const tdTotal = $("tb-total-debit");
-  const tcTotal = $("tb-total-credit");
-  const status = $("tb-status");
-
-  if (!tbody || !tdTotal || !tcTotal) return;
-
-  tbody.innerHTML = "";
-  if (status) status.textContent = "";
-
-  const balances = computeBalances();
-
-  const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
-
-  const list = [...COA].sort((a, b) => {
-    const ta = typeOrder[a.type] ?? 99;
-    const tb = typeOrder[b.type] ?? 99;
-    if (ta !== tb) return ta - tb;
-
-    const ca = codeNum(a.code);
-    const cb = codeNum(b.code);
-    if (ca !== cb) return ca - cb;
-
-    return String(a.name || "").localeCompare(String(b.name || ""));
-  });
-
-  let totalDebit = 0;
-  let totalCredit = 0;
-
-  list.forEach((a) => {
-    const bal = balances[a.id] || 0;
-
-    let debit = 0;
-    let credit = 0;
-
-    if (a.normal === "Debit") {
-      debit = Math.max(bal, 0);
-      credit = Math.max(-bal, 0);
-    } else {
-      credit = Math.max(bal, 0);
-      debit = Math.max(-bal, 0);
-    }
-
-    totalDebit += debit;
-    totalCredit += credit;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(a.code)}</td>
-      <td>${esc(a.name)}</td>
-      <td>${esc(a.type)}</td>
-      <td style="text-align:right;">${money(debit)}</td>
-      <td style="text-align:right;">${money(credit)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  tdTotal.textContent = money(totalDebit);
-  tcTotal.textContent = money(totalCredit);
-
-  const diff = Math.abs(totalDebit - totalCredit);
-  if (status) {
-    status.textContent =
-      diff < 0.00001 ? "Balanced ✅" : `Not balanced ❌ (Difference: ${money(diff)})`;
-  }
-}
-
-const PL_DEPARTMENTS = [
-  "Facilities",
-  "Finance",
-  "HR",
-  "IT",
-  "Marketing",
-  "Operations",
-  "Sales",
-  "Chiefs"
-];
-
 function renderProfitAndLoss() {
   const tbody = $("pl-body");
   const netEl = $("pl-net");
@@ -1320,7 +1241,6 @@ function renderProfitAndLoss() {
 
   tbody.innerHTML = "";
 
-  // date-filtered lines only
   const filteredLines = lines
     .filter((l) => !l.is_deleted)
     .filter((l) => {
@@ -1331,7 +1251,7 @@ function renderProfitAndLoss() {
     });
 
   // -----------------------------
-  // REVENUE GROUPS
+  // REVENUE (simple, no dropdown)
   // -----------------------------
   const revenueAccounts = COA
     .filter((a) => String(a.type || "").trim() === "Revenue")
@@ -1342,116 +1262,26 @@ function renderProfitAndLoss() {
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
 
-  const revenueGroups = {};
-  revenueAccounts.forEach((acct) => {
-    revenueGroups[acct.id] = {
-      code: acct.code || "",
-      name: acct.name || "",
-      total: 0,
-      departments: {}
-    };
-
-    PL_DEPARTMENTS.forEach((dept) => {
-      revenueGroups[acct.id].departments[dept] = 0;
-    });
-    revenueGroups[acct.id].departments["No Department"] = 0;
-  });
-
-  filteredLines.forEach((l) => {
-    const accountId = l.resolvedAccountId || l.accountId;
-    const grp = revenueGroups[accountId];
-    if (!grp) return;
-
-    const dept = String(l.department || "No Department").trim() || "No Department";
-    const amount = num(l.credit) - num(l.debit);
-
-    grp.total += amount;
-
-    if (grp.departments[dept] == null) grp.departments[dept] = 0;
-    grp.departments[dept] += amount;
-  });
-
-  // -----------------------------
-  // EXPENSE GROUPS
-  // -----------------------------
-  const expenseAccounts = COA
-    .filter((a) => {
-      const t = String(a.type || "").trim();
-      return t === "Expense" || t === "Expenses";
-    })
-    .sort((a, b) => {
-      const ca = codeNum(a.code);
-      const cb = codeNum(b.code);
-      if (ca !== cb) return ca - cb;
-      return String(a.name || "").localeCompare(String(b.name || ""));
-    });
-
-  const expenseGroups = {};
-  expenseAccounts.forEach((acct) => {
-    expenseGroups[acct.id] = {
-      code: acct.code || "",
-      name: acct.name || "",
-      total: 0,
-      departments: {}
-    };
-
-    PL_DEPARTMENTS.forEach((dept) => {
-      expenseGroups[acct.id].departments[dept] = 0;
-    });
-    expenseGroups[acct.id].departments["No Department"] = 0;
-  });
-
-  filteredLines.forEach((l) => {
-    const accountId = l.resolvedAccountId || l.accountId;
-    const grp = expenseGroups[accountId];
-    if (!grp) return;
-
-    const dept = String(l.department || "No Department").trim() || "No Department";
-    const amount = num(l.debit) - num(l.credit);
-
-    grp.total += amount;
-
-    if (grp.departments[dept] == null) grp.departments[dept] = 0;
-    grp.departments[dept] += amount;
-  });
-
   let totalRevenue = 0;
-  let totalExpense = 0;
 
-  // -----------------------------
-  // RENDER REVENUE
-  // -----------------------------
   const revHead = document.createElement("tr");
   revHead.innerHTML = `<td colspan="2"><b>Revenue</b></td>`;
   tbody.appendChild(revHead);
 
-  revenueAccounts.forEach((acct, i) => {
-    const grp = revenueGroups[acct.id];
-    totalRevenue += grp.total;
+  revenueAccounts.forEach((acct) => {
+    const acctId = acct.id;
+    const total = filteredLines
+      .filter((l) => (l.resolvedAccountId || l.accountId) === acctId)
+      .reduce((sum, l) => sum + (num(l.credit) - num(l.debit)), 0);
 
-    const detailClass = `pl-rev-${i}`;
+    totalRevenue += total;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>
-        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
-        <b>${esc(grp.name)} [Overall Total]</b>
-      </td>
-      <td style="text-align:right;">${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</td>
+      <td>${esc(acct.name)}</td>
+      <td style="text-align:right;">${money(Math.abs(total) < 0.00001 ? 0 : total)}</td>
     `;
     tbody.appendChild(tr);
-
-    const revenueDeptOrder = [...PL_DEPARTMENTS, "No Department"];
-    revenueDeptOrder.forEach((dept) => {
-      const dtr = document.createElement("tr");
-      dtr.className = detailClass;
-      dtr.style.display = "none";
-      dtr.innerHTML = `
-        <td style="padding-left:40px;">${esc(dept)}</td>
-        <td style="text-align:right;">${money(Math.abs(grp.departments[dept] || 0) < 0.00001 ? 0 : grp.departments[dept] || 0)}</td>
-      `;
-      tbody.appendChild(dtr);
-    });
   });
 
   const revTotal = document.createElement("tr");
@@ -1462,39 +1292,91 @@ function renderProfitAndLoss() {
   tbody.appendChild(revTotal);
 
   // -----------------------------
-  // RENDER EXPENSES
+  // EXPENSES (grouped parent + department detail)
   // -----------------------------
+  const expenseAccounts = COA
+    .filter((a) => {
+      const t = String(a.type || "").trim();
+      return t === "Expense" || t === "Expenses";
+    })
+    .sort((a, b) => {
+      const baseA = getExpenseGroupName(a.name || "");
+      const baseB = getExpenseGroupName(b.name || "");
+      const byBase = baseA.localeCompare(baseB);
+      if (byBase !== 0) return byBase;
+
+      const deptA = getDepartmentOrder(a.name || "");
+      const deptB = getDepartmentOrder(b.name || "");
+      if (deptA !== deptB) return deptA - deptB;
+
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
+  const expenseGroups = {};
+
+  expenseAccounts.forEach((acct) => {
+    const rawName = String(acct.name || "").trim();
+    const groupName = getExpenseGroupName(rawName);
+
+    if (!expenseGroups[groupName]) {
+      expenseGroups[groupName] = {
+        total: 0,
+        items: []
+      };
+    }
+
+    const acctId = acct.id;
+
+    const acctTotal = filteredLines
+      .filter((l) => (l.resolvedAccountId || l.accountId) === acctId)
+      .reduce((sum, l) => sum + (num(l.debit) - num(l.credit)), 0);
+
+    expenseGroups[groupName].total += acctTotal;
+    expenseGroups[groupName].items.push({
+      name: rawName,
+      total: acctTotal
+    });
+  });
+
+  let totalExpense = 0;
+
   const expHead = document.createElement("tr");
   expHead.innerHTML = `<td colspan="2"><b>Expenses</b></td>`;
   tbody.appendChild(expHead);
 
-  expenseAccounts.forEach((acct, i) => {
-    const grp = expenseGroups[acct.id];
+  Object.keys(expenseGroups).forEach((groupName, i) => {
+    const grp = expenseGroups[groupName];
     totalExpense += grp.total;
 
     const detailClass = `pl-exp-${i}`;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
+    const parentRow = document.createElement("tr");
+    parentRow.innerHTML = `
       <td>
         <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
-        <b>${esc(grp.name)} [Overall Total]</b>
+        <b>${esc(groupName)} [Overall Total]</b>
       </td>
-      <td style="text-align:right;">${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</td>
+      <td style="text-align:right;"><b>${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</b></td>
     `;
-    tbody.appendChild(tr);
+    tbody.appendChild(parentRow);
 
-    const expenseDeptOrder = [...PL_DEPARTMENTS, "No Department"];
-    expenseDeptOrder.forEach((dept) => {
-      const dtr = document.createElement("tr");
-      dtr.className = detailClass;
-      dtr.style.display = "none";
-      dtr.innerHTML = `
-        <td style="padding-left:40px;">${esc(dept)}</td>
-        <td style="text-align:right;">${money(Math.abs(grp.departments[dept] || 0) < 0.00001 ? 0 : grp.departments[dept] || 0)}</td>
-      `;
-      tbody.appendChild(dtr);
-    });
+    grp.items
+      .sort((a, b) => {
+        const deptA = getDepartmentOrder(a.name);
+        const deptB = getDepartmentOrder(b.name);
+        if (deptA !== deptB) return deptA - deptB;
+        return a.name.localeCompare(b.name);
+      })
+      .forEach((item) => {
+        const dtr = document.createElement("tr");
+        dtr.className = detailClass;
+        dtr.style.display = "none";
+        dtr.innerHTML = `
+          <td style="padding-left:40px;">${esc(item.name)}</td>
+          <td style="text-align:right;">${money(Math.abs(item.total) < 0.00001 ? 0 : item.total)}</td>
+        `;
+        tbody.appendChild(dtr);
+      });
   });
 
   const expTotal = document.createElement("tr");
@@ -1944,6 +1826,106 @@ function esc(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function getExpenseGroupName(name) {
+  const n = String(name || "").trim();
+
+  const prefixMap = [
+    "FE - ",
+    "Fine - ",
+    "HRE - ",
+    "ITE - ",
+    "ME - ",
+    "OpEx - ",
+    "SE - ",
+    "ChiE - "
+  ];
+
+  // General rows
+  if (n === "Facilities Department Expense - General") return "General";
+  if (n === "Finance Department Expense - General") return "General";
+  if (n === "Human Resource Department Expense - General") return "General";
+  if (n === "Information Technology Department Expense - General") return "General";
+  if (n === "Marketing Department Expense - General") return "General";
+  if (n === "Operation Department Expense - General") return "General";
+  if (n === "Sales Department Expense - General") return "General";
+  if (n === "Chiefs Expense - General") return "General";
+
+  for (const prefix of prefixMap) {
+    if (n.startsWith(prefix)) {
+      return n.slice(prefix.length).trim();
+    }
+  }
+
+  // special typo / underscore case
+  if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
+
+  return n;
+}
+
+function getDepartmentOrder(name) {
+  const n = String(name || "").trim();
+
+  if (n === "Facilities Department Expense - General" || n.startsWith("FE - ")) return 1;
+  if (n === "Finance Department Expense - General" || n.startsWith("Fine - ")) return 2;
+  if (n === "Human Resource Department Expense - General" || n.startsWith("HRE - ")) return 3;
+  if (n === "Information Technology Department Expense - General" || n.startsWith("ITE - ")) return 4;
+  if (n === "Marketing Department Expense - General" || n.startsWith("ME - ")) return 5;
+  if (n === "Operation Department Expense - General" || n.startsWith("OpEx - ")) return 6;
+  if (n === "Sales Department Expense - General" || n.startsWith("SE - ")) return 7;
+  if (n === "Chiefs Expense - General" || n.startsWith("ChiE - ") || n === "ChiE_Office_Equipment_Expense") return 8;
+
+  return 999;
+}function getExpenseGroupName(name) {
+  const n = String(name || "").trim();
+
+  const prefixMap = [
+    "FE - ",
+    "Fine - ",
+    "HRE - ",
+    "ITE - ",
+    "ME - ",
+    "OpEx - ",
+    "SE - ",
+    "ChiE - "
+  ];
+
+  // General rows
+  if (n === "Facilities Department Expense - General") return "General";
+  if (n === "Finance Department Expense - General") return "General";
+  if (n === "Human Resource Department Expense - General") return "General";
+  if (n === "Information Technology Department Expense - General") return "General";
+  if (n === "Marketing Department Expense - General") return "General";
+  if (n === "Operation Department Expense - General") return "General";
+  if (n === "Sales Department Expense - General") return "General";
+  if (n === "Chiefs Expense - General") return "General";
+
+  for (const prefix of prefixMap) {
+    if (n.startsWith(prefix)) {
+      return n.slice(prefix.length).trim();
+    }
+  }
+
+  // special typo / underscore case
+  if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
+
+  return n;
+}
+
+function getDepartmentOrder(name) {
+  const n = String(name || "").trim();
+
+  if (n === "Facilities Department Expense - General" || n.startsWith("FE - ")) return 1;
+  if (n === "Finance Department Expense - General" || n.startsWith("Fine - ")) return 2;
+  if (n === "Human Resource Department Expense - General" || n.startsWith("HRE - ")) return 3;
+  if (n === "Information Technology Department Expense - General" || n.startsWith("ITE - ")) return 4;
+  if (n === "Marketing Department Expense - General" || n.startsWith("ME - ")) return 5;
+  if (n === "Operation Department Expense - General" || n.startsWith("OpEx - ")) return 6;
+  if (n === "Sales Department Expense - General" || n.startsWith("SE - ")) return 7;
+  if (n === "Chiefs Expense - General" || n.startsWith("ChiE - ") || n === "ChiE_Office_Equipment_Expense") return 8;
+
+  return 999;
 }
 
 // ✅ Live red-border validation for required fields
