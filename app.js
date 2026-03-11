@@ -1251,7 +1251,7 @@ function renderProfitAndLoss() {
     });
 
   // -----------------------------
-  // REVENUE (simple, no dropdown)
+  // REVENUE
   // -----------------------------
   const revenueAccounts = COA
     .filter((a) => String(a.type || "").trim() === "Revenue")
@@ -1292,50 +1292,47 @@ function renderProfitAndLoss() {
   tbody.appendChild(revTotal);
 
   // -----------------------------
-  // EXPENSES (grouped parent + department detail)
+  // EXPENSES
   // -----------------------------
   const expenseAccounts = COA
     .filter((a) => {
       const t = String(a.type || "").trim();
       return t === "Expense" || t === "Expenses";
-    })
-    .sort((a, b) => {
-      const baseA = getExpenseGroupName(a.name || "");
-      const baseB = getExpenseGroupName(b.name || "");
-      const byBase = baseA.localeCompare(baseB);
-      if (byBase !== 0) return byBase;
-
-      const deptA = getDepartmentOrder(a.name || "");
-      const deptB = getDepartmentOrder(b.name || "");
-      if (deptA !== deptB) return deptA - deptB;
-
-      return String(a.name || "").localeCompare(String(b.name || ""));
     });
 
-  const expenseGroups = {};
+  const departmentGroups = {};
+  const companyItems = [];
 
   expenseAccounts.forEach((acct) => {
     const rawName = String(acct.name || "").trim();
-    const groupName = getExpenseGroupName(rawName);
-
-    if (!expenseGroups[groupName]) {
-      expenseGroups[groupName] = {
-        total: 0,
-        items: []
-      };
-    }
-
     const acctId = acct.id;
 
     const acctTotal = filteredLines
       .filter((l) => (l.resolvedAccountId || l.accountId) === acctId)
       .reduce((sum, l) => sum + (num(l.debit) - num(l.credit)), 0);
 
-    expenseGroups[groupName].total += acctTotal;
-    expenseGroups[groupName].items.push({
-      name: rawName,
-      total: acctTotal
-    });
+    if (isDepartmentExpenseName(rawName)) {
+      const groupName = getDepartmentExpenseGroupName(rawName);
+
+      if (!departmentGroups[groupName]) {
+        departmentGroups[groupName] = {
+          total: 0,
+          items: []
+        };
+      }
+
+      departmentGroups[groupName].total += acctTotal;
+      departmentGroups[groupName].items.push({
+        name: rawName,
+        total: acctTotal
+      });
+    } else {
+      companyItems.push({
+        name: rawName,
+        total: acctTotal,
+        code: acct.code || ""
+      });
+    }
   });
 
   let totalExpense = 0;
@@ -1344,11 +1341,18 @@ function renderProfitAndLoss() {
   expHead.innerHTML = `<td colspan="2"><b>Expenses</b></td>`;
   tbody.appendChild(expHead);
 
-  Object.keys(expenseGroups).forEach((groupName, i) => {
-    const grp = expenseGroups[groupName];
+  // -----------------------------
+  // DEPARTMENT EXPENSE GROUPS FIRST
+  // -----------------------------
+  const orderedDepartmentGroups = Object.keys(departmentGroups).sort((a, b) => {
+    return getDepartmentExpenseGroupOrder(a) - getDepartmentExpenseGroupOrder(b);
+  });
+
+  orderedDepartmentGroups.forEach((groupName, i) => {
+    const grp = departmentGroups[groupName];
     totalExpense += grp.total;
 
-    const detailClass = `pl-exp-${i}`;
+    const detailClass = `pl-dept-${i}`;
 
     const parentRow = document.createElement("tr");
     parentRow.innerHTML = `
@@ -1362,9 +1366,9 @@ function renderProfitAndLoss() {
 
     grp.items
       .sort((a, b) => {
-        const deptA = getDepartmentOrder(a.name);
-        const deptB = getDepartmentOrder(b.name);
-        if (deptA !== deptB) return deptA - deptB;
+        const da = getDepartmentOrder(a.name);
+        const db = getDepartmentOrder(b.name);
+        if (da !== db) return da - db;
         return a.name.localeCompare(b.name);
       })
       .forEach((item) => {
@@ -1378,6 +1382,33 @@ function renderProfitAndLoss() {
         tbody.appendChild(dtr);
       });
   });
+
+  // -----------------------------
+  // COMPANY EXPENSES AFTER DEPARTMENT EXPENSES
+  // -----------------------------
+  if (companyItems.length > 0) {
+    const companyHead = document.createElement("tr");
+    companyHead.innerHTML = `<td colspan="2"><b>Company Expenses</b></td>`;
+    tbody.appendChild(companyHead);
+
+    companyItems
+      .sort((a, b) => {
+        const oa = getCompanyExpenseOrder(a.name);
+        const ob = getCompanyExpenseOrder(b.name);
+        if (oa !== ob) return oa - ob;
+        return a.name.localeCompare(b.name);
+      })
+      .forEach((item) => {
+        totalExpense += item.total;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${esc(item.name)}</td>
+          <td style="text-align:right;">${money(Math.abs(item.total) < 0.00001 ? 0 : item.total)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+  }
 
   const expTotal = document.createElement("tr");
   expTotal.innerHTML = `
@@ -1819,17 +1850,54 @@ function money(n) {
   });
 }
 
-function esc(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function isDepartmentExpenseName(name) {
+  const n = String(name || "").trim();
+
+  if (
+    n === "Facilities Department Expense - General" ||
+    n === "Finance Department Expense - General" ||
+    n === "Human Resource Department Expense - General" ||
+    n === "Information Technology Department Expense - General" ||
+    n === "Marketing Department Expense - General" ||
+    n === "Operation Department Expense - General" ||
+    n === "Sales Department Expense - General" ||
+    n === "Chiefs Expense - General"
+  ) {
+    return true;
+  }
+
+  const prefixes = [
+    "FE - ",
+    "Fine - ",
+    "HRE - ",
+    "ITE - ",
+    "ME - ",
+    "OpEx - ",
+    "SE - ",
+    "ChiE - "
+  ];
+
+  if (prefixes.some((p) => n.startsWith(p))) return true;
+  if (n === "ChiE_Office_Equipment_Expense") return true;
+
+  return false;
 }
 
-function getExpenseGroupName(name) {
+function getDepartmentExpenseGroupName(name) {
   const n = String(name || "").trim();
+
+  if (
+    n === "Facilities Department Expense - General" ||
+    n === "Finance Department Expense - General" ||
+    n === "Human Resource Department Expense - General" ||
+    n === "Information Technology Department Expense - General" ||
+    n === "Marketing Department Expense - General" ||
+    n === "Operation Department Expense - General" ||
+    n === "Sales Department Expense - General" ||
+    n === "Chiefs Expense - General"
+  ) {
+    return "General";
+  }
 
   const prefixMap = [
     "FE - ",
@@ -1842,90 +1910,96 @@ function getExpenseGroupName(name) {
     "ChiE - "
   ];
 
-  // General rows
-  if (n === "Facilities Department Expense - General") return "General";
-  if (n === "Finance Department Expense - General") return "General";
-  if (n === "Human Resource Department Expense - General") return "General";
-  if (n === "Information Technology Department Expense - General") return "General";
-  if (n === "Marketing Department Expense - General") return "General";
-  if (n === "Operation Department Expense - General") return "General";
-  if (n === "Sales Department Expense - General") return "General";
-  if (n === "Chiefs Expense - General") return "General";
-
   for (const prefix of prefixMap) {
     if (n.startsWith(prefix)) {
-      return n.slice(prefix.length).trim();
+      let base = n.slice(prefix.length).trim();
+
+      if (base === "Internet & IT Expense") base = "Internet & Subscription Expense";
+      if (base === "Internet & Subcription Expense") base = "Internet & Subscription Expense";
+
+      return base;
     }
   }
 
-  // special typo / underscore case
   if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
 
   return n;
 }
 
-function getDepartmentOrder(name) {
-  const n = String(name || "").trim();
-
-  if (n === "Facilities Department Expense - General" || n.startsWith("FE - ")) return 1;
-  if (n === "Finance Department Expense - General" || n.startsWith("Fine - ")) return 2;
-  if (n === "Human Resource Department Expense - General" || n.startsWith("HRE - ")) return 3;
-  if (n === "Information Technology Department Expense - General" || n.startsWith("ITE - ")) return 4;
-  if (n === "Marketing Department Expense - General" || n.startsWith("ME - ")) return 5;
-  if (n === "Operation Department Expense - General" || n.startsWith("OpEx - ")) return 6;
-  if (n === "Sales Department Expense - General" || n.startsWith("SE - ")) return 7;
-  if (n === "Chiefs Expense - General" || n.startsWith("ChiE - ") || n === "ChiE_Office_Equipment_Expense") return 8;
-
-  return 999;
-}function getExpenseGroupName(name) {
-  const n = String(name || "").trim();
-
-  const prefixMap = [
-    "FE - ",
-    "Fine - ",
-    "HRE - ",
-    "ITE - ",
-    "ME - ",
-    "OpEx - ",
-    "SE - ",
-    "ChiE - "
+function getDepartmentExpenseGroupOrder(name) {
+  const order = [
+    "General",
+    "Advertising & Marketing",
+    "Meals & Entertainment",
+    "Bank Fees & Charges",
+    "Travel Expense",
+    "Lodging Expense",
+    "Mileage Expense",
+    "Telephone Expense",
+    "Internet & Subscription Expense",
+    "Electricity & Utilities",
+    "Rent Expense",
+    "Janitorial & Cleaning",
+    "Security Services",
+    "Postage & Shipping",
+    "Repairs & Maintenance",
+    "Office Supplies Expense",
+    "Office Equipment Expense",
+    "Depreciation Expense - Office Equipment",
+    "Depreciation Expense - Store Equipment",
+    "Salaries & Wages",
+    "Employee Benefits",
+    "Employee Allowances",
+    "Professional Fees",
+    "Service Fees",
+    "Government Fees & Permits",
+    "Taxes & Licenses",
+    "Parking Fees Expense"
   ];
 
-  // General rows
-  if (n === "Facilities Department Expense - General") return "General";
-  if (n === "Finance Department Expense - General") return "General";
-  if (n === "Human Resource Department Expense - General") return "General";
-  if (n === "Information Technology Department Expense - General") return "General";
-  if (n === "Marketing Department Expense - General") return "General";
-  if (n === "Operation Department Expense - General") return "General";
-  if (n === "Sales Department Expense - General") return "General";
-  if (n === "Chiefs Expense - General") return "General";
-
-  for (const prefix of prefixMap) {
-    if (n.startsWith(prefix)) {
-      return n.slice(prefix.length).trim();
-    }
-  }
-
-  // special typo / underscore case
-  if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
-
-  return n;
+  const idx = order.indexOf(name);
+  return idx === -1 ? 999 : idx;
 }
 
-function getDepartmentOrder(name) {
-  const n = String(name || "").trim();
+function getCompanyExpenseOrder(name) {
+  const order = [
+    "Company Expenses - General",
+    "Advertising & Marketing",
+    "Meals & Entertainment",
+    "Bank Fees & Charges",
+    "Travel Expense",
+    "Lodging Expense",
+    "Mileage Expense",
+    "Telephone Expense",
+    "Internet & Subcription Expense",
+    "Internet & Subscription Expense",
+    "Electricity & Utilities",
+    "Rent Expense",
+    "Janitorial & Cleaning",
+    "Security Services",
+    "Office Supplies Expense",
+    "Postage & Shipping",
+    "Repairs & Maintenance",
+    "Depreciation Expense - Office Equipment",
+    "Depreciation Expense - Store Equipment",
+    "Salaries & Wages Expense",
+    "Freelance/Service Expense",
+    "Employee Benefits",
+    "Employee Allowances",
+    "Professional Fees",
+    "Service Fees",
+    "Government Fees & Permits",
+    "Taxes & Licenses",
+    "Parking Fees Expense",
+    "Credit Card Charges",
+    "Bad Debt Expense",
+    "Purchase Discounts",
+    "Automobile Expense",
+    "Training & Development"
+  ];
 
-  if (n === "Facilities Department Expense - General" || n.startsWith("FE - ")) return 1;
-  if (n === "Finance Department Expense - General" || n.startsWith("Fine - ")) return 2;
-  if (n === "Human Resource Department Expense - General" || n.startsWith("HRE - ")) return 3;
-  if (n === "Information Technology Department Expense - General" || n.startsWith("ITE - ")) return 4;
-  if (n === "Marketing Department Expense - General" || n.startsWith("ME - ")) return 5;
-  if (n === "Operation Department Expense - General" || n.startsWith("OpEx - ")) return 6;
-  if (n === "Sales Department Expense - General" || n.startsWith("SE - ")) return 7;
-  if (n === "Chiefs Expense - General" || n.startsWith("ChiE - ") || n === "ChiE_Office_Equipment_Expense") return 8;
-
-  return 999;
+  const idx = order.indexOf(String(name || "").trim());
+  return idx === -1 ? 999 : idx;
 }
 
 // ✅ Live red-border validation for required fields
