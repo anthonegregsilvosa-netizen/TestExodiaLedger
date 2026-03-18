@@ -37,8 +37,14 @@ let COA = [];
 let currentCOAType = "All";
 let lines = []; // loaded from Supabase (journal_lines)
 
-let filterFrom = ""; // YYYY-MM-DD
-let filterTo = "";   // YYYY-MM-DD
+let currentView = "coa";
+
+const viewFilters = {
+  coa: { from: "", to: "" },
+  ledger: { from: "", to: "" },
+  trial: { from: "", to: "" },
+  journal: { from: "", to: "" }
+};
 
 // ==============================
 // AUTH UI helpers
@@ -622,42 +628,58 @@ window.applyDateRangeFilter = function () {
   const from = $("filter-from")?.value || "";
   const to = $("filter-to")?.value || "";
 
-  filterFrom = from;
-  filterTo = to;
+  if (!viewFilters[currentView]) {
+    viewFilters[currentView] = { from: "", to: "" };
+  }
 
-  localStorage.setItem(FILTER_FROM_KEY, from);
-  localStorage.setItem(FILTER_TO_KEY, to);
+  viewFilters[currentView].from = from;
+  viewFilters[currentView].to = to;
 
-    renderCOA();
-  renderLedger();
+  if (currentView === "coa") renderCOA();
+  if (currentView === "ledger") renderLedger();
 
-  const wsTrial = $("ws-trial");
-  const wsPL = $("ws-pl");
-  const wsSFP = $("ws-sfp");
+  if (currentView === "trial") {
+    const wsPL = $("ws-pl");
+    const wsSFP = $("ws-sfp");
 
-  if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
-  else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
-  else renderTrialBalance();
+    if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+    else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+    else renderTrialBalance();
+  }
+
+  if (currentView === "journal") {
+    const journalMode = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+    if (journalMode === "history") renderHistory();
+  }
 };
 
 window.clearDateRange = function () {
-  filterFrom = "";
-  filterTo = "";
+  if (!viewFilters[currentView]) {
+    viewFilters[currentView] = { from: "", to: "" };
+  }
+
+  viewFilters[currentView].from = "";
+  viewFilters[currentView].to = "";
+
   if ($("filter-from")) $("filter-from").value = "";
   if ($("filter-to")) $("filter-to").value = "";
-  localStorage.removeItem(FILTER_FROM_KEY);
-  localStorage.removeItem(FILTER_TO_KEY);
 
-    renderCOA();
-  renderLedger();
+  if (currentView === "coa") renderCOA();
+  if (currentView === "ledger") renderLedger();
 
-  const wsTrial = $("ws-trial");
-  const wsPL = $("ws-pl");
-  const wsSFP = $("ws-sfp");
+  if (currentView === "trial") {
+    const wsPL = $("ws-pl");
+    const wsSFP = $("ws-sfp");
 
-  if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
-  else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
-  else renderTrialBalance();
+    if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+    else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+    else renderTrialBalance();
+  }
+
+  if (currentView === "journal") {
+    const journalMode = localStorage.getItem(JOURNAL_VIEW_KEY) || "history";
+    if (journalMode === "history") renderHistory();
+  }
 };
 
 // ==============================
@@ -708,6 +730,8 @@ window.showWorksheet = function (view) {
 window.show = function (view) {
   if (view === "journal-history") view = "journal";
 
+  currentView = view;
+
   localStorage.setItem(LAST_VIEW_KEY, view);
 
   ["coa", "journal", "ledger", "trial"].forEach((v) => {
@@ -726,7 +750,11 @@ window.show = function (view) {
   if (journalTb) journalTb.style.display = (view === "journal") ? "block" : "none";
 
   const dateBar = $("date-range-bar");
+  const vf = viewFilters[view] || { from: "", to: "" };
+  if ($("filter-from")) $("filter-from").value = vf.from || "";
+  if ($("filter-to")) $("filter-to").value = vf.to || "";
   const journalMode = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+  
 
   if (view === "journal" && journalMode === "entry") {
     if (dateBar) dateBar.style.display = "none";
@@ -1023,7 +1051,10 @@ function renderCOA() {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  const balances = computeBalances();
+ const balances = computeBalances(
+  viewFilters.coa?.from || "",
+  viewFilters.coa?.to || ""
+);
 
   const totalsByType = {
     Asset: 0,
@@ -1142,9 +1173,11 @@ function renderLedger() {
     .filter((l) => !l.is_deleted)
     .filter((l) => (l.resolvedAccountId || l.accountId) === accountId)
     .filter((l) => {
+  const from = viewFilters.ledger?.from || "";
+  const to = viewFilters.ledger?.to || "";
   const d = String(l.entry_date || "");
-  if (filterFrom && d < filterFrom) return false;
-  if (filterTo && d > filterTo) return false;
+  if (from && d < from) return false;
+  if (to && d > to) return false;
   return true;
 })
     .sort(
@@ -1205,18 +1238,18 @@ function renderLedger() {
 // ==============================
 // Compute balances
 // ==============================
-function computeBalances() {
+function computeBalances(from = "", to = "") {
   const normals = Object.fromEntries(COA.map((a) => [a.id, a.normal]));
   const balances = {};
 
   lines
     .filter((l) => !l.is_deleted)
     .filter((l) => {
-  const d = String(l.entry_date || "");
-  if (filterFrom && d < filterFrom) return false;
-  if (filterTo && d > filterTo) return false;
-  return true;
-})
+      const d = String(l.entry_date || "");
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    })
     .forEach((l) => {
       const key = l.resolvedAccountId || l.accountId;
       const normal = normals[key] || "Debit";
@@ -1246,7 +1279,10 @@ function renderTrialBalance() {
   tbody.innerHTML = "";
   if (status) status.textContent = "";
 
-  const balances = computeBalances();
+  const balances = computeBalances(
+  viewFilters.trial?.from || "",
+  viewFilters.trial?.to || ""
+);
 
   const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
 
@@ -1310,14 +1346,17 @@ function renderProfitAndLoss() {
 
   tbody.innerHTML = "";
 
-  const filteredLines = lines
-    .filter((l) => !l.is_deleted)
-    .filter((l) => {
-      const d = String(l.entry_date || "");
-      if (filterFrom && d < filterFrom) return false;
-      if (filterTo && d > filterTo) return false;
-      return true;
-    });
+const from = viewFilters.trial?.from || "";
+const to = viewFilters.trial?.to || "";
+
+const filteredLines = lines
+  .filter((l) => !l.is_deleted)
+  .filter((l) => {
+    const d = String(l.entry_date || "");
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  });
 
   // -----------------------------
   // REVENUE
@@ -1494,7 +1533,10 @@ function renderStatementOfFinancialPosition() {
 
   tbody.innerHTML = "";
 
-  const balances = computeBalances();
+  const balances = computeBalances(
+  viewFilters.trial?.from || "",
+  viewFilters.trial?.to || ""
+);
 
   let totalAssets = 0;
   let totalLiabilities = 0;
