@@ -639,6 +639,11 @@ Apply
 
     <select id="ledger-account" onchange="renderLedger()"></select>
 
+    <div class="ledger-download-actions">
+  <button class="btn primary" onclick="downloadLedgerPDF()">Download PDF</button>
+  <button class="btn" onclick="downloadLedgerExcel()">Download Excel</button>
+</div>
+
     <table border="1" cellpadding="6">
       <thead>
         <tr>
@@ -842,6 +847,7 @@ Apply
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="./app.js"></script>
 
 </body>
